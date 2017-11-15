@@ -36,8 +36,8 @@ var ENEMY_MAX_COUNT = 100;
 //Boss
 var BOSS_COLOR = 'rgba(35, 71, 148,0.8)';
 var BOSS_SHOT_COLOR = 'rgba(255,255,0,1)';
-var BOSS_HP = 100;
-var BOSS_SABHP = 2;
+var BOSS_HP = 250;
+var BOSS_SABHP = 4;
 var BOSS_MAX_COUNT = 2;
 var BOSS_SHOT_MAX_COUNT = 10000;
 //Bossenemy
@@ -90,12 +90,12 @@ window.onload = function () {
   var Bossenemy = new Array(BOSSENEMY_MAX_COUNT);
   /*for (i = 0; i < BOSSENEMY_MAX_COUNT; i++)
     Bossenemy[i] = new Bossenemy();*/
-    /* var audio = new Audio();
-      audio.src = "./Dear....mp3";
-      audio.loop = true;
+  /* var audio = new Audio();
+    audio.src = "./Dear....mp3";
+    audio.loop = true;
 
-      // 再生を開始する
-      audio.play();*/
+    // 再生を開始する
+    audio.play();*/
 
 
   chara.position.x = 675;
@@ -344,7 +344,8 @@ window.onload = function () {
         ctx.fill();
       }
       //雑魚敵
-      if (point < -Infinity) { // enemy,chara,enemyShotに関する全般
+      if (point < -Infinity) {
+        //以下エネミーとのあたり判定 
         if (!Wascheating && !invincible) {
           for (j = 0; j < ENEMY_SHOT_MAX_COUNT; j++) {
             if (!enemyShot[j].alive) continue;
@@ -378,7 +379,20 @@ window.onload = function () {
               point -= 1000;
             }
           } // enemy と　chara の当り判定
-        } // enemyShot と　chara | enemy と　chara の当り判定
+        }
+        for (i = 0; i < ENEMY_MAX_COUNT; i++) {
+          if (!enemy[i].alive) continue;
+          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
+            if (!charaShot[j].alive) continue;
+            if (Math.pow(enemy[i].position.x - charaShot[j].position.x, 2) +
+              Math.pow(enemy[i].position.y - charaShot[j].position.y, 2) <=
+              Math.pow(charaShot[j].size + enemy[i].size, 2)) {
+              enemy[i].alive = false;
+              charaShot[j].alive = false;
+              point += 50;
+            }
+          }
+        } //以上 
 
         counter++;
         if (counter % 40 === 0) {
@@ -459,19 +473,6 @@ window.onload = function () {
           ctx.fill();
         } // 敵のたまの移動、表示
 
-        for (i = 0; i < ENEMY_MAX_COUNT; i++) {
-          if (!enemy[i].alive) continue;
-          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
-            if (!charaShot[j].alive) continue;
-            if (Math.pow(enemy[i].position.x - charaShot[j].position.x, 2) +
-              Math.pow(enemy[i].position.y - charaShot[j].position.y, 2) <=
-              Math.pow(charaShot[j].size + enemy[i].size, 2)) {
-              enemy[i].alive = false;
-              charaShot[j].alive = false;
-              point += 50;
-            }
-          }
-        } // boss, charaShot の当り判定
       } else if (point > -Infinity) { // ボス
         if (!Wascheating && !invincible) {
           for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
@@ -507,6 +508,18 @@ window.onload = function () {
             }
           } // boss と　chara の当り判定
         } // bossShot と　chara | boss と　chara の当り判定
+        for (i = 0; i < BOSS_MAX_COUNT; i++) {
+          if (!boss[i].alive) continue;
+          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
+            if (!charaShot[j].alive) continue;
+            if (Math.pow(boss[i].position.x - charaShot[j].position.x, 2) +
+              Math.pow(boss[i].position.y - charaShot[j].position.y, 2) <=
+              Math.pow(charaShot[j].size + boss[i].size, 2)) {
+              BOSS_HP -= 1;
+              charaShot[j].alive = false;
+            }
+          }
+        } // enemy, charaShot の当り判定
 
         counter++;
         if (counter % 10 === 0) {
@@ -527,7 +540,7 @@ window.onload = function () {
           }
         }
 
-        if (BOSS_SABHP = 2) {
+        if (BOSS_SABHP == 4) {
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
@@ -635,10 +648,9 @@ window.onload = function () {
             }
           }
           ctx.fill();
-        }; //Boss_1
+        }; //Boss4
 
-
-        if (BOSS_MAX_COUNT <= 1) {
+        if (BOSS_SABHP == 2) {
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
@@ -667,7 +679,7 @@ window.onload = function () {
 
 
                 let vectorCounter = 0;
-                // ボスーショットを調査する
+                // エネミーショットを調査する
                 for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
                   if (!bossShot[j].alive) {
                     if (boss[i].type == 0) {
@@ -679,21 +691,16 @@ window.onload = function () {
                     }
                   }
 
-                  　
+                  　 // 1個出現させたのでループを抜ける
                 }
               }
-              /*SHOT_*/
               bosscounter++;
-
               // パスをいったん閉じる
               ctx.closePath();
-
             }
             ctx.fill();
             // Boss の移動,球の発射,敵の表示
-
           }
-
 
           ctx.fillStyle = BOSS_SHOT_COLOR;
           ctx.beginPath();
@@ -701,7 +708,6 @@ window.onload = function () {
             if (bossShot[i].alive) // continue;
             {
               bossShot[i].move();
-              //console.log("bossShot 描画");
               ctx.arc(
                 bossShot[i].position.x,
                 bossShot[i].position.y,
@@ -712,50 +718,46 @@ window.onload = function () {
             }
           }
           ctx.fill();
-          //Bossenemy
-
-
-        }; //Boss_2
-
-
-        for (i = 0; i < BOSS_MAX_COUNT; i++) {
-          if (!boss[i].alive) continue;
-          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
-            if (!charaShot[j].alive) continue;
-            if (Math.pow(boss[i].position.x - charaShot[j].position.x, 2) +
-              Math.pow(boss[i].position.y - charaShot[j].position.y, 2) <=
-              Math.pow(charaShot[j].size + boss[i].size, 2)) {
-              BOSS_HP -= 1;
-              charaShot[j].alive = false;
-            }
-          }
-        } // enemy, charaShot の当り判定
-
-
-
-
-
-        for (i = 0; i < BOSS_MAX_COUNT; i++) {
-          if (!boss[i].alive) continue;
-          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
-            if (!charaShot[j].alive) continue;
-            if (Math.pow(boss[i].position.x - charaShot[j].position.x, 2) +
-              Math.pow(boss[i].position.y - charaShot[j].position.y, 2) <=
-              Math.pow(charaShot[j].size + boss[i].size, 2)) {
-              BOSS_HP -= 1;
-              charaShot[j].alive = false;
-            }
-          }
-        } // enemy, charaShot の当り判定
+        }; //Boss3
+       
       }
     }
-    info.innerHTML = "Score" + point + "||" + "Life" + life;
+
+    info.innerHTML = "Score" + point + "||" + "Life" + life + "\\" + BOSS_SABHP;
     info_2.innerHTML = "Boss" + BOSS_MAX_COUNT + "||" + "BOSS_HP" + BOSS_HP;
-    if (BOSS_MAX_COUNT == 1) {} else if (BOSS_MAX_COUNT >= 2) {}
+    if (BOSS_SABHP == 4) {
+      if (BOSS_HP <= 150) {
+        BOSS_SABHP = 3;
+        point += 100
+      }
+    }
+    if (BOSS_SABHP == 3) {
+      if (BOSS_HP == 0) {
+        BOSS_SABHP = 2;
+        point += 150;
+        BOSS_MAX_COUNT = 1;
+        BOSS_HP = 450;
+        ChangeColor();
+      }
+    }
+    if (BOSS_SABHP == 2) {
+      if (BOSS_HP <= 250) {
+        BOSS_SABHP = 1;
+        //point += 200
+      }
+    }
+    if (BOSS_SABHP == 1) {
+      if (BOSS_HP == 0) {
+        BOSS_SABHP = 0;
+        point += 250;
+        BOSS_MAX_COUNT = 0;
+        BOSS_HP = 0;
+      }
+    }
     if (life < 0) ShowGameover("Score || " + point);
     else requestAnimationFrame(arguments.callee);
     if (BOSS_MAX_COUNT <= 0) ShowClear("GAME CLEAR\nScore||" + point);
-    
+
   })();
 };
 
@@ -805,7 +807,7 @@ function keyDown(event) {
   if (event.altKey && event.ctrlKey) {
     IsCheating = true;
   }
-  if (ck === 90)
+  if (ck === 83)
     IsSlow = true;
 
   if (event.shiftKey && event.ctrlKey) {
@@ -832,7 +834,7 @@ function keyUp(event) {
     mouseUp();
     return;
   }
-  if (ck === 90) {
+  if (ck === 83) {
     IsSlow = false;
     return;
   }
@@ -863,7 +865,7 @@ function ChangeColor() {
   } else if (Wascheating) {
     CHARA_COLOR = 'rgba(50, 255, 50, 0.5)';
   } else CHARA_COLOR = 'rgba(0,0,0,1)';
-  if (BOSS_MAX_COUNT == 1) {
+  if (BOSS_SABHP == 2) {
     BOSS_COLOR = 'rgba(255,255,0,1)', BOSS_SHOT_COLOR = 'rgba(35, 71, 148,0.8)';
   }
   if (IsSlow) {
