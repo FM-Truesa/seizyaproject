@@ -124,21 +124,10 @@ Boss.prototype.set = function (p, size, type) {
 
 Boss.prototype.move = function () {
     this.param++;
-    switch (this.type) {
-        case 0:
-            break;
-     /*   case 1:
-            this.position.x += 3;
-            if (this.position.x > this.size + screenCanvas.width)
-                this.alive = false;
-            break;
-        case 2:
-            this.position.x -= 3;
-            if (this.position.x < -this.size)
-                this.alive = false;
-            break;*/
-    }
-};
+    if (this.position.y < (screenCanvas.height - this.size) / 2) {
+        this.position.y += 1;
+    };
+}
 // boss shot-------------------------
 function BossShot() {
     this.position = new Point();
@@ -155,7 +144,7 @@ BossShot.prototype.set = function (p, vector, size, speed) {
     this.size = size;
     this.speed = speed;
     this.vector = vector;
-    this.alive = true ;
+    this.alive = true;
 };
 BossShot.prototype.move = function () {
     // 座標をベクトルに応じてspeed分だけ移動させる
@@ -168,12 +157,12 @@ BossShot.prototype.move = function () {
         this.position.y < -this.size ||
         this.position.x > this.size + screenCanvas.width ||
         this.position.y > this.size + screenCanvas.height
-     ) {
+    ) {
         this.alive = false;
     }
 };
-//Boss's enemy---------------------------------------------------------------------------
-function Bossenemy() {
+// - BossSAB-------------------------------------------------------------
+function BossSAB() {
     this.position = new Point();
     this.size = 100;
     this.type = 0;
@@ -181,7 +170,7 @@ function Bossenemy() {
     this.alive = false;
 }
 
-Bossenemy.prototype.set = function (p, size, type) {
+BossSAB.prototype.set = function (p, size, type) {
     this.position.x = p.x;
     this.position.y = p.y;
     this.size = size;
@@ -190,52 +179,16 @@ Bossenemy.prototype.set = function (p, size, type) {
     this.alive = true;
 };
 
-Bossenemy.prototype.move = function () {
+BossSAB.prototype.move = function () {
     this.param++;
     switch (this.type) {
         case 0:
-            this.position.x += 3;
-            if (this.position.x > this.size + screenCanvas.width)
-                this.alive = false;
+            if (this.position.x > screenCanvas.height / 4)
+                this.position.x -= 1;
             break;
-    }
-};
-// Boss's enemy shot-------------------------
-function BossenemyShot() {
-    this.position = new Point();
-    this.vector = new Point();
-    this.size = 0;
-    this.speed = 0;
-    this.alive = false;
-}
-
-BossenemyShot.prototype.set = function (p, vector, size, speed) {
-    // 座標、ベクトルをセット
-    this.position.x = p.x;
-    this.position.y = p.y;
-    this.vector.x = vector.x;
-    this.vector.y = vector.y;
-
-    // サイズ、スピードをセット
-    this.size = size;
-    this.speed = speed;
-
-    // 生存フラグを立てる
-    this.alive = true;
-};
-
-BossenemyShot.prototype.move = function () {
-    // 座標をベクトルに応じてspeed分だけ移動させる
-    this.position.x += this.vector.x * this.speed;
-    this.position.y += this.vector.y * this.speed;
-
-    // 一定以上の座標に到達していたら生存フラグを降ろす
-    if (
-        this.position.x < -this.size ||
-        this.position.y < -this.size ||
-        this.position.x > this.size + screenCanvas.width ||
-        this.position.y > this.size + screenCanvas.height
-    ) {
-        this.alive = false;
+        case 1:
+            if (this.position.x > screenCanvas.height / 4 * 3)
+                this.position.x += 1;
+            break;
     }
 };
