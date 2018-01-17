@@ -21,6 +21,11 @@ var Syuugou = false;
 var Music = false;
 var point = 0;
 var invincible = false;
+//count-------------------------------------------
+var bossSABcounter = 0;
+var bossSABa = false;
+var bossSABb = false;
+var bossSABc = false;
 
 // - const --------------------------------------------------------------------
 //Chara
@@ -42,29 +47,33 @@ var BOSS_MAX_COUNT = 2;
 var BOSS_SHOT_MAX_COUNT = 10000;
 var BOSS_COUNTER = "妖狐";
 //BossSAB
-var BOSSSAB_MAX_COUNT = 100;
+var BOSSSAB_MAX_COUNT = 2;
 var BOSSSAB_COLOR = 'rgba(35, 71, 160,0.8)';
+//BossEnemy
+var BOSSENEMY_MAX_COUNT = 10000;
+var BOSSENEMY_COLOR = 'rgba(253, 126,0,0.8)';
+//BossEnemy
+var BOSSENEMY_SHOT_MAX_COUNT = 10000;
+var BOSSENEMY_SHOT_COLOR = 'rgba(253, 126,0,0.8)';
 // - main ---------------------------------------------------------------------
 window.onload = function () {
   var img = new Image();
   img.src = "back8.bmp";
   var i, j;
-  var p = new Point();
-
-  screenCanvas = document.getElementById('screen');
-  screenCanvas.width = 1364;
-  screenCanvas.height = 630;
-  ctx = screenCanvas.getContext('2d');
-  screenCanvas.addEventListener('mousemove', mouseMove, true);
-  screenCanvas.addEventListener('mousedown', mouseDown, true);
-  screenCanvas.addEventListener('mouseup', mouseUp, true);
-  document.addEventListener('keydown', keyDown, true);
-  document.addEventListener('keyup', keyUp, true);
-  info = document.getElementById('info');
-  info_2 = document.getElementById('info_2');
-
-  var chara = new Character();
-  chara.init(10);
+  var p = new Point(); {
+    screenCanvas = document.getElementById('screen');
+    screenCanvas.width = 1364;
+    screenCanvas.height = 630;
+    ctx = screenCanvas.getContext('2d');
+    screenCanvas.addEventListener('mousemove', mouseMove, true);
+    screenCanvas.addEventListener('mousedown', mouseDown, true);
+    screenCanvas.addEventListener('mouseup', mouseUp, true);
+    document.addEventListener('keydown', keyDown, true);
+    document.addEventListener('keyup', keyUp, true);
+    info = document.getElementById('info');
+    info_2 = document.getElementById('info_2');
+  }
+  // - ショット用インスタンス-------------------------------
   var charaShot = new Array(CHARA_SHOT_MAX_COUNT);
   for (i = 0; i < charaShot.length; i++)
     charaShot[i] = new CharacterShot();
@@ -75,17 +84,26 @@ window.onload = function () {
   for (i = 0; i < bossShot.length; i++)
     bossShot[i] = new BossShot();
   var bossCount = 0;
+  var bossenemy1Shot = new Array(BOSSENEMY_SHOT_MAX_COUNT);
+  for (i = 0; i < enemyShot.length; i++)
+    bossenemy1Shot[i] = new BossEnemy1Shot();
 
-  // - 敵キャラクター用インスタンスの初期化-------------------------------
+  // - キャラクター用インスタンス-------------------------------
+  var chara = new Character();
+  chara.init(10);
   var enemy = new Array(ENEMY_MAX_COUNT);
   for (i = 0; i < ENEMY_MAX_COUNT; i++)
     enemy[i] = new Enemy();
   var boss = new Array(BOSS_MAX_COUNT);
   for (i = 0; i < BOSS_MAX_COUNT; i++)
     boss[i] = new Boss();
-  var bossSAB = new Array(BOSS_MAX_COUNT);
-  for (i = 0; i < BOSSSAB_MAX_COUNT; i++)
+  var bossSAB = new Array(10000);
+  for (i = 0; i < 10000; i++)
     bossSAB[i] = new BossSAB();
+  var bossenemy1 = new Array(BOSSENEMY_MAX_COUNT);
+  for (i = 0; i < BOSSENEMY_MAX_COUNT; i++)
+    bossenemy1[i] = new BossEnemy1();
+
 
   // -音楽(BGM)---------------------------------------------------------
   /* var audio = new Audio();
@@ -599,18 +617,15 @@ window.onload = function () {
 
         counter++;
         if (counter % 40 === 0) {
-          // すべてのエネミーを調査する
           for (i = 0; i < ENEMY_MAX_COUNT; i++) {
-            // エネミーの生存フラグをチェック
             if (!enemy[i].alive) {
-              j = (counter % 80) / 40; // タイプを決定するパラメータを算出
+              j = (counter % 80) / 40;
               var enemySize = 15;
-              // タイプに応じて初期位置を決める
               p.x = -enemySize + (screenCanvas.width + enemySize * 4) * j
               p.y = screenCanvas.height / 4;
               if (j == 1) p.y = 100;
-              enemy[i].set(p, enemySize, j << 0); // エネミーを新規にセット
-              break; // 1体出現させたのでループを抜ける
+              enemy[i].set(p, enemySize, j << 0);
+              break;
             }
           }
         } // enemy を新しく追加
@@ -619,11 +634,8 @@ window.onload = function () {
           ctx.fillStyle = ENEMY_COLOR;
           ctx.beginPath();
           for (i = 0; i < ENEMY_MAX_COUNT; i++) {
-            // エネミーの生存フラグをチェック
             if (enemy[i].alive) {
-              // エネミーを動かす
               enemy[i].move();
-              // エネミーを描くパスを設定
               ctx.arc(
                 enemy[i].position.x,
                 enemy[i].position.y,
@@ -631,13 +643,10 @@ window.onload = function () {
                 0, Math.PI * 2, false
               );
               enemy[i].param++;
-              // ショットを打つかどうかパラメータの値からチェック
               if (enemy[i].param % 100 === 0) {
-                // エネミーショットを調査する
                 for (j = 0; j < ENEMY_SHOT_MAX_COUNT; j++) {
                   if (!enemyShot[j].alive) {
                     if (enemy[i].type == 0) {
-                      // エネミーショットを新規にセットする
                       p = enemy[i].position.distance(chara.position);
                       p.normalize();
                       enemyShot[j].set(enemy[i].position, p, 5, 3);
@@ -647,16 +656,15 @@ window.onload = function () {
                         y: 1.5
                       }, 5, 3);
                     }
-                    break;　 // 1個出現させたのでループを抜ける
+                    break;　
                   }
                 }
               }
-              // パスをいったん閉じる
               ctx.closePath();
             }
           }
           ctx.fill();
-        } // 敵の移動,球の発射,敵の表示
+        }
 
         {
           ctx.fillStyle = ENEMY_SHOT_COLOR;
@@ -675,7 +683,7 @@ window.onload = function () {
           ctx.fill();
         } // 敵のたまの移動、表示
 
-      } else if (point > -Infinity) { // ボス
+      } else if (point > -Infinity) {
         if (!Wascheating && !invincible) {
           for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
             if (!bossShot[j].alive) continue;
@@ -692,7 +700,7 @@ window.onload = function () {
               bossShot[j].alive = false;
               point -= 1000;
             }
-          } // boss と　chara の当り判定
+          }
           for (j = 0; j < BOSS_MAX_COUNT; j++) {
             if (!boss[j].alive) continue;
             if (Math.pow(chara.position.x - boss[j].position.x, 2) +
@@ -708,8 +716,8 @@ window.onload = function () {
               BOSS_HP -= 10;
               point += 1000;
             }
-          } // boss と　chara の当り判定
-        } // bossShot と　chara | boss と　chara の当り判定
+          }
+        }
         for (i = 0; i < BOSS_MAX_COUNT; i++) {
           if (!boss[i].alive) continue;
           for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
@@ -721,32 +729,27 @@ window.onload = function () {
               charaShot[j].alive = false;
             }
           }
-        } // enemy, charaShot の当り判定
-
+        }
         counter++;
         if (BOSS_SABHP >= 3) {
           if (counter % 10 === 0) {
-            // すべてのエネミーを調査する
             for (i = 0; i < BOSS_MAX_COUNT; i++) {
-              // エネミーの生存フラグをチェック
               if (!boss[i].alive) {
-                j = (counter % 30) / 10; // タイプを決定するパラメータを算出
+                j = (counter % 30) / 10;
                 var bossSize = 20;
                 p.x = (screenCanvas.width - bossSize) / 2;
                 p.y = screenCanvas.height / 4;
                 if (j == 0 && boss.some((v) => v.type == 0 && v.alive)) break;
                 if ((j == 1 || j == 2) && ((counter % 60 != 0) || Math.random() > 1)) break;
-                boss[i].set(p, bossSize, j << 0); // エネミーを新規にセット
-                break; // 1体出現させたのでループを抜ける
+                boss[i].set(p, bossSize, j << 0);
+                break;
               }
             }
           }
         }
         if (BOSS_SABHP <= 2) {
           if (counter % 10 === 0) {
-            // すべてのエネミーを調査する
             for (i = 0; i < BOSS_MAX_COUNT; i++) {
-              // エネミーの生存フラグをチェック
               if (!boss[i].alive) {
                 j = (counter % 30) / 10; // タイプを決定するパラメータを算出
                 var bossSize = 20;
@@ -760,7 +763,7 @@ window.onload = function () {
             }
           }
         }
-
+        // BOSSの挙動----------------------------------------------
         if (BOSS_SABHP == 4) {
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
@@ -869,10 +872,8 @@ window.onload = function () {
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            // エネミーの生存フラグをチェック
             if (boss[i].alive) {
               /*boss[i].move();*/
-              // エネミーを描くパスを設定
               ctx.arc(
                 boss[i].position.x,
                 boss[i].position.y,
@@ -880,8 +881,7 @@ window.onload = function () {
                 0, Math.PI * 2, false
               );
               /*boss[i].param++;*/
-              // ショットを打つかどうかパラメータの値からチェック                               
-              if ( /*SHOT_*/ bosscounter % 30 == 0) {
+              if (bosscounter % 30 == 0) {
                 a = boss[i].position.distance(chara.position);
                 a.normalize();
                 let Vectors = [{
@@ -892,32 +892,26 @@ window.onload = function () {
                 }];
 
                 let vectorCounter = 0;
-                // エネミーショットを調査する
                 for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
                   if (!bossShot[j].alive) {
                     if (boss[i].type == 0) {
-                      // エネミーショットを新規にセットする
-
                       bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　 // 1個出現させたのでループを抜ける
+                  }　
                 }
               }
               bosscounter++;
-              // パスをいったん閉じる
               ctx.closePath();
             }
             ctx.fill();
-            // Boss の移動,球の発射,敵の表示
           }
 
           ctx.fillStyle = BOSS_SHOT_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_SHOT_MAX_COUNT; i++) {
-            if (bossShot[i].alive) // continue;
-            {
+            if (bossShot[i].alive) {
               bossShot[i].move();
               ctx.arc(
                 bossShot[i].position.x,
@@ -928,22 +922,34 @@ window.onload = function () {
               ctx.closePath();
             }
           }
-          ctx.fill();
-
-          var bossSABcounter = 0;
-          bossSABcounter++;
-          if (bossSABcounter % 40 === 0) {
-            for (i = 0; i < BOSSSAB_MAX_COUNT; i++) {
-              if (!bossSAB[i].alive) {
-                j = (bossSABcounter % 80) / 40;
-                var bossSABSize = 10;
-                p.x = boss[i].position.x
-                p.y = boss[i].position.y
-                bossSAB[i].set(p, bossSABSize, j << 0);
-                break;
+          ctx.fill(); {
+            if (bossSAB[0].position.x <= screenCanvas.width / 2) {
+              bossSABa = true;
+              bossSABb = true;
+            };
+            /*if (bossSAB[1].position.x >= screenCanvas.width / 2) {
+              bossSABb = true;
+            };*/
+            if (bossSABa == true && bossSABb == true) {
+              setTimeout(function () {
+                bossSABc = true;
+              }, 5000);
+            };
+            if (!bossSABc) {
+              bossSABcounter++;
+              if (bossSABcounter % 50 === 0) {
+                for (i = 0; i < BOSSSAB_MAX_COUNT; i++) {
+                  if (!bossSAB[i].alive) {
+                    j = (bossSABcounter % 80) / 40;
+                    var bossSABSize = 15;
+                    p.x = screenCanvas.width / 2,
+                      p.y = screenCanvas.height / 4,
+                      bossSAB[i].set(p, bossSABSize, j << 0);
+                    break;
+                  }
+                }
               }
-            }
-          } {
+            };
             ctx.fillStyle = BOSSSAB_COLOR;
             ctx.beginPath();
             for (i = 0; i < BOSSSAB_MAX_COUNT; i++) {
@@ -959,6 +965,61 @@ window.onload = function () {
               }
             }
             ctx.fill();
+          } {
+            if (bossSABc == true) {
+              BOSSSAB_MAX_COUNT = 10000;
+            };
+            counter++;
+            if (counter % 40 === 0) {
+              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
+                if (!bossenemy1[i].alive) {
+                  j = (counter % 80) / 40;
+                  var bossenemy1Size = 10;
+                  p.x = bossSAB[0].position.x,
+                    p.y = bossSAB[0].position.y,
+                    //if (j == 1) p.y = 100;
+                    bossenemy1[i].set(p, bossenemy1Size, j << 0);
+                  break;
+                }
+              }
+            } {
+              ctx.fillStyle = BOSSENEMY_COLOR;
+              ctx.beginPath();
+              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
+                if (bossenemy1[i].alive) {
+                  bossenemy1[i].move();
+                  ctx.arc(
+                    bossenemy1[i].position.x,
+                    bossenemy1[i].position.y,
+                    bossenemy1[i].size,
+                    0, Math.PI * 2, false
+                  );
+                  bossenemy1[i].param++;
+                  if (bossenemy1[i].param % 100 === 0) {
+                    for (j = 0; j < BOSSENEMY_SHOT_MAX_COUNT; j++) {
+                      if (!bossenemy1Shot[j].alive) {
+                        if (bossenemy1Shot[i].type == 0) {
+                          p = bossenemy1[i].position.distance(chara.position);
+                          p.normalize();
+                          bossenemy1Shot[j].set(bossenemy1[i].position, {
+                            x: 1.5,
+                            y: -1.5
+                          }, 5, 3);
+                        } else {
+                          bossenemy1Shot[j].set(bossenemy1[i].position, {
+                            x: -1.5,
+                            y: -1.5
+                          }, 5, 3);
+                        }
+                        break;　
+                      }
+                    }
+                  }
+                  ctx.closePath();
+                }
+              }
+              ctx.fill();
+            }
           }
         }; //Boss3
 

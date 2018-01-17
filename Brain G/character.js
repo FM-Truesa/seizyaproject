@@ -75,26 +75,18 @@ function EnemyShot() {
 }
 
 EnemyShot.prototype.set = function (p, vector, size, speed) {
-    // 座標、ベクトルをセット
     this.position.x = p.x;
     this.position.y = p.y;
     this.vector.x = vector.x;
     this.vector.y = vector.y;
-
-    // サイズ、スピードをセット
     this.size = size;
     this.speed = speed;
-
-    // 生存フラグを立てる
     this.alive = true;
 };
 
 EnemyShot.prototype.move = function () {
-    // 座標をベクトルに応じてspeed分だけ移動させる
     this.position.x += this.vector.x * this.speed;
     this.position.y += this.vector.y * this.speed;
-
-    // 一定以上の座標に到達していたら生存フラグを降ろす
     if (
         this.position.x < -this.size ||
         this.position.y < -this.size ||
@@ -183,12 +175,72 @@ BossSAB.prototype.move = function () {
     this.param++;
     switch (this.type) {
         case 0:
-            if (this.position.x > screenCanvas.height / 4)
+            if (this.position.x >= screenCanvas.width / 4)
                 this.position.x -= 1;
             break;
         case 1:
-            if (this.position.x > screenCanvas.height / 4 * 3)
+            if (this.position.x <= screenCanvas.width / 4 * 3)
                 this.position.x += 1;
             break;
     }
 };
+// - bossenemy1-------------------------------------------------------------
+function BossEnemy1() {
+    this.position = new Point();
+    this.size = 100;
+    this.type = 0;
+    this.param = 0;
+    this.alive = false;
+}
+
+BossEnemy1.prototype.set = function (p, size, type) {
+    this.position.x = p.x;
+    this.position.y = p.y;
+    this.size = size;
+    this.type = type;
+    this.param = 0;
+    this.alive = true;
+};
+
+BossEnemy1.prototype.move = function () {
+    this.param++;
+    switch (this.type) {
+        case 0:
+            this.position.y += 3;
+            if (this.position.y > this.size + screenCanvas.height)
+                this.alive = false;
+            break;
+    }
+};
+// bossenemy1 shot-------------------------
+{
+    function BossEnemy1Shot() {
+        this.position = new Point();
+        this.vector = new Point();
+        this.size = 0;
+        this.speed = 0;
+        this.alive = false;
+    }
+    BossEnemy1Shot.prototype.set = function (p, vector, size, speed) {
+        this.position.x = p.x;
+        this.position.y = p.y;
+        this.vector.x = vector.x;
+        this.vector.y = vector.y;
+        this.size = size;
+        this.speed = speed;
+        this.alive = true;
+    };
+
+    BossEnemy1Shot.prototype.move = function () {
+        this.position.x += this.vector.x * this.speed;
+        this.position.y += this.vector.y * this.speed;
+        if (
+            //this.position.x < -this.size ||
+            this.position.y < -this.size ||
+            //this.position.x > this.size + screenCanvas.width ||
+            this.position.y > this.size + screenCanvas.height
+        ) {
+            this.alive = false;
+        }
+    };
+}
