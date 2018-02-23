@@ -12,8 +12,8 @@ var _ = {
 	C: { // Character クラス についての設定
 		life: 5, // 何回死ねますか?
 		size: 10,
-		color: 'rgb(255, 80, 90)',
-		invincibleColor: 'rgb(255, 160, 180)', //無敵状態での色
+		color: 'rgba(255, 160, 180, 0.5)',
+		invincibleColor: 'rgba(255, 80, 90, 0.5)', //無敵状態での色
 		startX: 675, // 自機の開始位置
 		startY: 400, // 自機の開始位置
 		speed: 5, //1フレームで自機が進むピクセル数
@@ -21,7 +21,7 @@ var _ = {
 		shotSpeed: 4, //1フレームで玉が進むピクセル数
 		shotSpan: 10, //キー押しっぱなしのときに、何フレームごとに玉を発射するか
 		shotRadians: [-60, -20, 0, 20, 60], // 玉を発射する角度(上方向を0をし、反時計回りに増えていく)
-		shotColor: 'rgb(200, 50, 0)',
+		shotColor: 'rgba(200, 50, 0, .3)',
 		shotSize: 3,
 		invincibleTime: 100 // start時から何フレーム間、無敵ですか
 	},
@@ -91,7 +91,7 @@ window.onload = function () {
 	var char = new Character();
 	var charShots = new Shots(_.C.shotColor, _.C.shotSize);
 	var enemys = new Enemys();
-	var enemyShots = new Shots('rgb(10, 100, 230)', 5);
+	var enemyShots = new Shots('rgba(10, 100, 230, 0.6)', 5);
 	var infoUpdater = (function () {
 		var prevText = "";
 		return function (text) {
@@ -99,15 +99,13 @@ window.onload = function () {
 			prevText = text;
 		}
 	})(); // textに、前と違うのがはいったときだけ更新する関数が代入されている。
-    var img = new Image();
-    img.src = "../Brain G/back2.jpg";
 	(function loop() {
 		if (life < 0) {
 			// GAME OVER 時
 			document.getElementById("gameover").innerText = "GAME OVER\nSCORE: " + score;
 			document.getElementById("gameover-wrap").classList.remove("hidden");
 			document.getElementById("gameover-wrap").classList.add("shown");
-			info.innerHTML = `Life: ${Math.max(0, life)}`;
+			info.innerHTML = `Life: ${Math.max(0,life)}`;
 			return;
 		} else {
 			time++;
@@ -183,24 +181,7 @@ window.onload = function () {
 				// 以下、描画処理
 
 				infoUpdater(`Score: ${score} | Life: ${Math.max(0, life)}`);
-				//ctx.clearRect(0, 0, _.Screen.width, _.Screen.height);
-
-				ctx.globalCompositeOperation = "source-over";
-				ctx.globalAlpha = .5;
-				ctx.fillStyle="#EEE";
-				ctx.fillRect(0, 0, _.Screen.width, _.Screen.height);
-				ctx.globalAlpha = .2;
-				ctx.drawImage(img, 0, 0, _.Screen.width, _.Screen.height);
-				ctx.globalAlpha = 1;
-				ctx.globalCompositeOperation = "overlay";
-				enemys.draw(ctx);
-				enemyShots.draw(ctx);
-				charShots.draw(ctx);
-				char.draw(ctx, invincibleTime >= 0);
-				enemys.draw(ctx);
-				enemyShots.draw(ctx);
-				charShots.draw(ctx);
-				char.draw(ctx, invincibleTime >= 0);
+				ctx.clearRect(0, 0, _.Screen.width, _.Screen.height);
 				enemys.draw(ctx);
 				enemyShots.draw(ctx);
 				charShots.draw(ctx);
@@ -432,7 +413,7 @@ class Enemys {
 	 * @param {CanvasRenderingContext2D} ctx どの ctx に描画するのかを指定する
 	 */
 	draw(ctx) {
-		ctx.fillStyle = "rgb(10, 100, 230)";
+		ctx.fillStyle = "rgba(10, 100, 230, 0.6)";
 		ctx.beginPath();
 		for (var i = 0; i < this.enemys.length; i++) {
 			ctx.arc(

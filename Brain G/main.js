@@ -58,7 +58,7 @@ var BOSSENEMY_SHOT_COLOR = 'rgba(253, 126,0,0.8)';
 // - main ---------------------------------------------------------------------
 window.onload = function () {
   var img = new Image();
-  img.src = "back8.bmp";
+  img.src = "back9.bmp";
   var i, j;
   var p = new Point(); {
     screenCanvas = document.getElementById('screen');
@@ -135,16 +135,16 @@ window.onload = function () {
         } else {
           var speed = 5;
           if (IsSlow) speed = 5;
-          if (Key === 39) {
+          if (Key === 68) {
             chara.position.x += speed;
           }
-          if (Key === 37) {
+          if (Key === 65) {
             chara.position.x -= speed;
           }
-          if (Key === 38) {
+          if (Key === 87) {
             chara.position.y -= speed;
           }
-          if (Key === 40) {
+          if (Key === 83) {
             chara.position.y += speed;
           }
         }
@@ -922,7 +922,76 @@ window.onload = function () {
               ctx.closePath();
             }
           }
-          ctx.fill(); {
+          ctx.fill();
+          //bossenemy-----------------------------------------------------------
+          {
+            /*if (bossSABc == true) {
+              BOSSSAB_MAX_COUNT = 10000;
+            };*/
+            counter++;
+            if (counter % 40 === 0) {
+              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
+                if (!bossenemy1[i].alive) {
+                  j = (counter % 80) / 40;
+                  var bossenemy1Size = 10;
+                  if (j == 1) p.x = screenCanvas.width / 6 * 5;
+                  p.x = screenCanvas.width / 6,
+                    p.y = screenCanvas.height / 4,
+                    bossenemy1[i].set(p, bossenemy1Size, j << 0);
+                  break;
+                }
+              }
+              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
+                if (!bossenemy1[i].alive) {
+                  j = (counter % 80) / 40;
+                  var bossenemy1Size = 10;
+                  if (j == 1) p.x = screenCanvas.width / 6;
+                  p.x = screenCanvas.width / 6 * 5,
+                    p.y = screenCanvas.height / 4,
+                    bossenemy1[i].set(p, bossenemy1Size, j << 0);
+                  break;
+                }
+              }
+            } {
+              ctx.fillStyle = BOSSENEMY_COLOR;
+              ctx.beginPath();
+              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
+                if (bossenemy1[i].alive) {
+                  bossenemy1[i].move();
+                  ctx.arc(
+                    bossenemy1[i].position.x,
+                    bossenemy1[i].position.y,
+                    bossenemy1[i].size,
+                    0, Math.PI * 2, false
+                  );
+                  bossenemy1[i].param++;
+                  if (bossenemy1[i].param % 100 === 0) {
+                    for (j = 0; j < BOSSENEMY_SHOT_MAX_COUNT; j++) {
+                      if (!bossenemy1[j].alive) {
+                        if (bossenemy1Shot[i].type == 0) {
+                          p = bossenemy1[i].position.distance(chara.position);
+                          p.normalize();
+                          bossenemy1Shot[j].set(bossenemy1[i].position, {
+                            x: 1.5,
+                            y: -1.5
+                          }, 5, 3);
+                        } else {
+                          bossenemy1Shot[j].set(bossenemy1[i].position, {
+                            x: -1.5,
+                            y: -1.5
+                          }, 5, 3);
+                        }
+                        break;　
+                      }
+                    }
+                  }
+                  ctx.closePath();
+                }
+              }
+              ctx.fill();
+            }
+          } {
+            //bossSAB-------------------------------------------------------------
             if (bossSAB[0].position.x <= screenCanvas.width / 2) {
               bossSABa = true;
               bossSABb = true;
@@ -965,61 +1034,6 @@ window.onload = function () {
               }
             }
             ctx.fill();
-          } {
-            if (bossSABc == true) {
-              BOSSSAB_MAX_COUNT = 10000;
-            };
-            counter++;
-            if (counter % 40 === 0) {
-              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
-                if (!bossenemy1[i].alive) {
-                  j = (counter % 80) / 40;
-                  var bossenemy1Size = 10;
-                  p.x = bossSAB[0].position.x,
-                    p.y = bossSAB[0].position.y,
-                    //if (j == 1) p.y = 100;
-                    bossenemy1[i].set(p, bossenemy1Size, j << 0);
-                  break;
-                }
-              }
-            } {
-              ctx.fillStyle = BOSSENEMY_COLOR;
-              ctx.beginPath();
-              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
-                if (bossenemy1[i].alive) {
-                  bossenemy1[i].move();
-                  ctx.arc(
-                    bossenemy1[i].position.x,
-                    bossenemy1[i].position.y,
-                    bossenemy1[i].size,
-                    0, Math.PI * 2, false
-                  );
-                  bossenemy1[i].param++;
-                  if (bossenemy1[i].param % 100 === 0) {
-                    for (j = 0; j < BOSSENEMY_SHOT_MAX_COUNT; j++) {
-                      if (!bossenemy1Shot[j].alive) {
-                        if (bossenemy1Shot[i].type == 0) {
-                          p = bossenemy1[i].position.distance(chara.position);
-                          p.normalize();
-                          bossenemy1Shot[j].set(bossenemy1[i].position, {
-                            x: 1.5,
-                            y: -1.5
-                          }, 5, 3);
-                        } else {
-                          bossenemy1Shot[j].set(bossenemy1[i].position, {
-                            x: -1.5,
-                            y: -1.5
-                          }, 5, 3);
-                        }
-                        break;　
-                      }
-                    }
-                  }
-                  ctx.closePath();
-                }
-              }
-              ctx.fill();
-            }
           }
         }; //Boss3
 
@@ -1244,7 +1258,7 @@ function keyDown(event) {
   if (event.altKey && event.ctrlKey) {
     IsCheating = true;
   }
-  if (ck === 83)
+  if (ck === 16)
     IsSlow = true;
 
   if (event.shiftKey && event.ctrlKey) {
@@ -1253,10 +1267,10 @@ function keyDown(event) {
   if (event.ctrlKey && ck === 90) {
     Wascheating = true;
   }
-  if (ck === 71) {
+  if (ck === 38) {
     Syuugou = true;
   }
-  if (ck === 82) {
+  if (ck === 40) {
     Kakusan = true;
   }
 }
@@ -1271,15 +1285,15 @@ function keyUp(event) {
     mouseUp();
     return;
   }
-  if (ck === 83) {
+  if (ck === 16) {
     IsSlow = false;
     return;
   }
-  if (ck === 71) {
+  if (ck === 38) {
     Syuugou = false;
     return;
   }
-  if (ck === 82) {
+  if (ck === 40) {
     Kakusan = false;
     return;
   }

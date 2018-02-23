@@ -175,11 +175,11 @@ BossSAB.prototype.move = function () {
     this.param++;
     switch (this.type) {
         case 0:
-            if (this.position.x >= screenCanvas.width / 4)
+            if (this.position.x >= screenCanvas.width / 6)
                 this.position.x -= 1;
             break;
         case 1:
-            if (this.position.x <= screenCanvas.width / 4 * 3)
+            if (this.position.x <= screenCanvas.width / 6 * 5)
                 this.position.x += 1;
             break;
     }
