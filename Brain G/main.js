@@ -10,14 +10,12 @@ var fire = false;
 var counter = 0;
 var SHOT_counter = 0;
 var /*SHOT_*/ bosscounter = 0;
-var chara;
+//var chara;
+var IsSlow = false;
 var IsCheating = false;
 var Arecheating = false;
 var Wascheating = false;
 var Key = 0;
-var IsSlow = false;
-var Kakusan = false;
-var Syuugou = false;
 var Music = false;
 var point = 0;
 var invincible = false;
@@ -26,13 +24,26 @@ var bossSABcounter = 0;
 var bossSABa = false;
 var bossSABb = false;
 var bossSABc = false;
-
+//control---------------------------------------
+var up = 38;
+var down = 40;
+var right = 39;
+var left = 37;
 // - const --------------------------------------------------------------------
 //Chara
 var CHARA_COLOR = 'rgba(0,0,0,1)';
 var CHARA_SHOT_COLOR = 'rgba(255,255,255, 1)';
 var life = 5;
 var CHARA_SHOT_MAX_COUNT = 10000;
+var Kakusan = false;
+var Syuugou = false;
+var rightshot = false;
+var leftshot = false;
+var Nfrontshot = 87;
+var Nbehindshot = 83;
+var Nrightshot = 68;
+var Nleftshot = 65;
+var JIKIshotpar = 15;
 //Enemy
 var ENEMY_COLOR = 'rgba(10, 100, 230, 0.6)';
 var ENEMY_SHOT_COLOR = 'rgba(0, 50, 255, 1)';
@@ -41,7 +52,7 @@ var ENEMY_MAX_COUNT = 100;
 //Boss
 var BOSS_COLOR = 'rgba(35, 71, 130,0.8)';
 var BOSS_SHOT_COLOR = 'rgba(255,255,0,1)';
-var BOSS_HP = 250;
+var BOSS_HP = 400;
 var BOSS_SABHP = 4;
 var BOSS_MAX_COUNT = 2;
 var BOSS_SHOT_MAX_COUNT = 10000;
@@ -49,12 +60,6 @@ var BOSS_COUNTER = "妖狐";
 //BossSAB
 var BOSSSAB_MAX_COUNT = 2;
 var BOSSSAB_COLOR = 'rgba(35, 71, 160,0.8)';
-//BossEnemy
-var BOSSENEMY_MAX_COUNT = 10000;
-var BOSSENEMY_COLOR = 'rgba(253, 126,0,0.8)';
-//BossEnemy
-var BOSSENEMY_SHOT_MAX_COUNT = 10000;
-var BOSSENEMY_SHOT_COLOR = 'rgba(253, 126,0,0.8)';
 // - main ---------------------------------------------------------------------
 window.onload = function () {
   var img = new Image();
@@ -76,7 +81,7 @@ window.onload = function () {
   // - ショット用インスタンス-------------------------------
   var charaShot = new Array(CHARA_SHOT_MAX_COUNT);
   for (i = 0; i < charaShot.length; i++)
-    charaShot[i] = new CharacterShot();
+    charaShot[i] = new CharaShot();
   var enemyShot = new Array(ENEMY_SHOT_MAX_COUNT);
   for (i = 0; i < enemyShot.length; i++)
     enemyShot[i] = new EnemyShot();
@@ -84,9 +89,6 @@ window.onload = function () {
   for (i = 0; i < bossShot.length; i++)
     bossShot[i] = new BossShot();
   var bossCount = 0;
-  var bossenemy1Shot = new Array(BOSSENEMY_SHOT_MAX_COUNT);
-  for (i = 0; i < enemyShot.length; i++)
-    bossenemy1Shot[i] = new BossEnemy1Shot();
 
   // - キャラクター用インスタンス-------------------------------
   var chara = new Character();
@@ -100,11 +102,6 @@ window.onload = function () {
   var bossSAB = new Array(10000);
   for (i = 0; i < 10000; i++)
     bossSAB[i] = new BossSAB();
-  var bossenemy1 = new Array(BOSSENEMY_MAX_COUNT);
-  for (i = 0; i < BOSSENEMY_MAX_COUNT; i++)
-    bossenemy1[i] = new BossEnemy1();
-
-
   // -音楽(BGM)---------------------------------------------------------
   /* var audio = new Audio();
     audio.src = "./Dear....mp3";
@@ -135,16 +132,16 @@ window.onload = function () {
         } else {
           var speed = 5;
           if (IsSlow) speed = 5;
-          if (Key === 68) {
+          if (Key === right) {
             chara.position.x += speed;
           }
-          if (Key === 65) {
+          if (Key === left) {
             chara.position.x -= speed;
           }
-          if (Key === 87) {
+          if (Key === up) {
             chara.position.y -= speed;
           }
-          if (Key === 83) {
+          if (Key === down) {
             chara.position.y += speed;
           }
         }
@@ -245,306 +242,229 @@ window.onload = function () {
         }
 
         // JIKIのチート玉
-        if (BOSS_SABHP >= 3) {
-          if (fire) {
-            if (SHOT_counter % 10 === 0) {
-              // すべての自機ショットを調査する
-              var Count = 0;
-              for (i = 0; i < charaShot.length; i++) {
-                if (!charaShot[i].alive) {
-                  switch (Count) {
-                    case 0:
-                      charaShot[i].set(chara.position, 4, 0, 3);
-                      break;
-                    case 1:
-                      if (!Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x - 30,
-                        y: chara.position.y + 10
-                      }, Sabchara / 2, 0, 3);
-                      break;
-                    case 2:
-                      if (!Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x + 30,
-                        y: chara.position.y + 10
-                      }, Sabchara / 2, 0, 3);
-                      break;
-                    case 3:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 3, 3);
-                      break;
-                    case 4:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -3, 3);
-                      break;
-                    case 5:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 5, 3);
-                      break;
-                    case 6:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -5, 3);
-                      break;
-                    case 7:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 7, 3);
-                      break;
-                    case 8:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -7, 3);
-                      break;
-                    case 9:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 9, 2);
-                      break;
-                    case 10:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -9, 2);
-                      break;
-                    case 11:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 9, 0);
-                      break;
-                    case 12:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -9, 0);
-                      break;
-                    case 13:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 0, -3);
-                      break;
-                    case 14:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 1, -3);
-                      break;
-                    case 15:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -1, -3);
-                      break;
-                    case 16:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 3, -3);
-                      break;
-                    case 17:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -3, -3);
-                      break;
-                    case 18:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 5, -3);
-                      break;
-                    case 19:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -5, -3);
-                      break;
-                    case 20:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 7, -3);
-                      break;
-                    case 21:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -7, -3);
-                      break;
-                    case 22:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 9, -2);
-                      break;
-                    case 23:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -9, -2);
-                      break;
-                    case 24:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 1, 3);
-                      break;
-                    case 25:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -1, 3);
-                      break
-                    case 26:
-                      if (Syuugou && !Kakusan) charaShot[i].set({
-                        x: chara.position.x + 30,
-                        y: chara.position.y + 10
-                      }, Sabchara / 2, 0.5, 4);
-                      break;
-                    case 27:
-                      if (Syuugou && !Kakusan) charaShot[i].set({
-                        x: chara.position.x - 30,
-                        y: chara.position.y + 10
-                      }, Sabchara / 2, -0.5, 4);
-                      break;
-                    case 28:
-                      if (Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x + 30,
-                        y: chara.position.y + 10
-                      }, Sabchara / 2, -1, 3);
-                      break;
-                    case 29:
-                      if (Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x - 30,
-                        y: chara.position.y + 10
-                      }, Sabchara / 2, 1, 3);
-                    default:
-                      break;
-                  }
-                  Count++;
-                  if (Count > 29) break;
-                }
-              }
+        if (fire) {
+          if (SHOT_counter % JIKIshotpar === 0) {
+            // すべての自機ショットを調査する
+            var Count = 0;
+            for (i = 0; i < charaShot.length; i++) {
+              if (!charaShot[i].alive) {
+                switch (Count) {
+                  case 0:
+                    if (BOSS_SABHP >= 3) charaShot[i].set(chara.position, 4, 0, 3);
+                    break;
+                  case 1:
+                    if (Kakusan == false && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                      x: chara.position.x - 30,
+                      y: chara.position.y + 10
+                    }, Sabchara / 2, 0, 3);
+                    break;
+                  case 2:
+                    if (Kakusan == false && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                      x: chara.position.x + 30,
+                      y: chara.position.y + 10
+                    }, Sabchara / 2, 0, 3);
+                    break;
+                  case 3:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 3, 3);
+                    break;
+                  case 4:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -3, 3);
+                    break;
+                  case 5:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 5, 3);
+                    break;
+                  case 6:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -5, 3);
+                    break;
+                  case 7:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 7, 3);
+                    break;
+                  case 8:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -7, 3);
+                    break;
+                  case 9:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 9, 2);
+                    break;
+                  case 10:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -9, 2);
+                    break;
+                  case 11:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 9, 0);
+                    break;
+                  case 12:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -9, 0);
+                    break;
+                  case 13:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 0, -3);
+                    break;
+                  case 14:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 1, -3);
+                    break;
+                  case 15:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -1, -3);
+                    break;
+                  case 16:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 3, -3);
+                    break;
+                  case 17:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -3, -3);
+                    break;
+                  case 18:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 5, -3);
+                    break;
+                  case 19:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -5, -3);
+                    break;
+                  case 20:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 7, -3);
+                    break;
+                  case 21:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -7, -3);
+                    break;
+                  case 22:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 9, -2);
+                    break;
+                  case 23:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -9, -2);
+                    break;
+                  case 24:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, 1, 3);
+                    break;
+                  case 25:
+                    if (Arecheating) charaShot[i].set(chara.position, 3, -1, 3);
+                    break
+                  case 26:
+                    if (Kakusan == false && Syuugou == true && BOSS_SABHP >= 3) charaShot[i].set({
+                      x: chara.position.x + 30,
+                      y: chara.position.y + 10
+                    }, Sabchara / 2, 0.5, 4);
+                    break;
+                  case 27:
+                    if (Kakusan == false && Syuugou == true && BOSS_SABHP >= 3) charaShot[i].set({
+                      x: chara.position.x - 30,
+                      y: chara.position.y + 10
+                    }, Sabchara / 2, -0.5, 4);
+                    break;
+                  case 28:
+                    if (Kakusan == true && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                      x: chara.position.x + 30,
+                      y: chara.position.y + 10
+                    }, Sabchara / 2, -1, 3);
+                    break;
+                  case 29:
+                    if (Kakusan == true && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                      x: chara.position.x - 30,
+                      y: chara.position.y + 10
+                    }, Sabchara / 2, 1, 3);
+                    break;
+                  case 30:
+                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2,
+                      y: chara.position.y - SAB2
+                    }, outcharacter / 2 - 1, 0, 3);
+                    break;
+                  case 31:
+                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2,
+                      y: chara.position.y - SAB2
+                    }, outcharacter / 2 - 1, 0, 3);
+                    break;
+                  case 32:
+                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2 * 3,
+                      y: chara.position.y - SAB2
+                    }, outcharacter / 2 - 1, 0, 3);
+                    break;
+                  case 33:
+                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2 * 3,
+                      y: chara.position.y - SAB2
+                    }, outcharacter / 2 - 1, 0, 3);
+                    break;
+                  case 34:
+                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2,
+                      y: chara.position.y + SAB2
+                    }, outcharacter / 2 - 1, 0, -3);
+                    break;
+                  case 35:
+                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2,
+                      y: chara.position.y + SAB2
+                    }, outcharacter / 2 - 1, 0, -3);
+                    break;
+                  case 36:
+                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2 * 3,
+                      y: chara.position.y + SAB2
+                    }, outcharacter / 2 - 1, 0, -3);
+                    break;
+                  case 37:
+                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2 * 3,
+                      y: chara.position.y + SAB2
+                    }, outcharacter / 2 - 1, 0, -3);
+                    break;
+                  case 38:
+                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2,
+                      y: chara.position.y + SAB2
+                    }, outcharacter / 2 - 1, 3, 0);
+                    break;
+                  case 39:
+                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2,
+                      y: chara.position.y - SAB2
+                    }, outcharacter / 2 - 1, 3, 0);
+                    break;
+                  case 40:
+                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2,
+                      y: chara.position.y + SAB2 * 3
+                    }, outcharacter / 2 - 1, 3, 0);
+                    break;
+                  case 41:
+                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x - SAB2,
+                      y: chara.position.y - SAB2 * 3
+                    }, outcharacter / 2 - 1, 3, 0);
+                    break;
+                  case 42:
+                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2,
+                      y: chara.position.y + SAB2
+                    }, outcharacter / 2 - 1, -3, 0);
+                    break;
+                  case 43:
+                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2,
+                      y: chara.position.y - SAB2
+                    }, outcharacter / 2 - 1, -3, 0);
+                    break;
+                  case 44:
+                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2,
+                      y: chara.position.y + SAB2 * 3
+                    }, outcharacter / 2 - 1, -3, 0);
+                    break;
+                  case 45:
+                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                      x: chara.position.x + SAB2,
+                      y: chara.position.y - SAB2 * 3
+                    }, outcharacter / 2 - 1, -3, 0);
+                    break;
 
-            }
-            SHOT_counter++;
-            // fire = false;
-          }
-        }
-        if (BOSS_SABHP <= 2) {
-          if (fire) {
-            if (SHOT_counter % 10 === 0) {
-              // すべての自機ショットを調査する
-              var Count = 0;
-              for (i = 0; i < charaShot.length; i++) {
-                if (!charaShot[i].alive) {
-                  switch (Count) {
-                    case 0:
-                      if (!Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x + SAB2,
-                        y: chara.position.y + SAB2
-                      }, outcharacter / 2 - 1, -2, -2);
-                      break;
-                    case 1:
-                      if (!Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x + SAB2,
-                        y: chara.position.y - SAB2
-                      }, outcharacter / 2 - 1, -2, 2);
-                      break;
-                    case 2:
-                      if (!Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x - SAB2,
-                        y: chara.position.y + SAB2
-                      }, outcharacter / 2 - 1, 2, -2);
-                      break;
-                    case 3:
-                      if (!Kakusan && !Syuugou) charaShot[i].set({
-                        x: chara.position.x - SAB2,
-                        y: chara.position.y - SAB2
-                      }, outcharacter / 2 - 1, 2, 2);
-                      break;
-                    case 4:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 3, 3);
-                      break;
-                    case 5:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -3, 3);
-                      break;
-                    case 6:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 5, 3);
-                      break;
-                    case 7:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -5, 3);
-                      break;
-                    case 8:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 7, 3);
-                      break;
-                    case 9:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -7, 3);
-                      break;
-                    case 10:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 9, 2);
-                      break;
-                    case 11:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -9, 2);
-                      break;
-                    case 12:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 9, 0);
-                      break;
-                    case 13:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -9, 0);
-                      break;
-                    case 14:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 0, -3);
-                      break;
-                    case 15:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 1, -3);
-                      break;
-                    case 16:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -1, -3);
-                      break;
-                    case 17:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 3, -3);
-                      break;
-                    case 18:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -3, -3);
-                      break;
-                    case 19:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 5, -3);
-                      break;
-                    case 20:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -5, -3);
-                      break;
-                    case 21:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 7, -3);
-                      break;
-                    case 22:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -7, -3);
-                      break;
-                    case 23:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 9, -2);
-                      break;
-                    case 24:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -9, -2);
-                      break;
-                    case 25:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, 1, 3);
-                      break;
-                    case 26:
-                      if (Arecheating) charaShot[i].set(chara.position, 3, -1, 3);
-                      break
-                    case 27:
-                      if (!Kakusan && Syuugou) charaShot[i].set({
-                        x: chara.position.x + SAB2,
-                        y: chara.position.y + SAB2
-                      }, Sabchara, -SAB2 / 7, -SAB2 / 7);
-                      break;
-                    case 28:
-                      if (!Kakusan && Syuugou) charaShot[i].set({
-                        x: chara.position.x + SAB2,
-                        y: chara.position.y - SAB2 * 2.5
-                      }, Sabchara, -SAB2 / (6 * 2), (SAB2 * 2.5) / (6 * 2));
-                      break;
-                    case 29:
-                      if (!Kakusan && Syuugou) charaShot[i].set({
-                        x: chara.position.x + SAB2,
-                        y: chara.position.y + SAB2 * 2.5
-                      }, Sabchara, -SAB2 / (6 * 2), -(SAB2 * 2.5) / (6 * 2));
-                      break;
-                    case 30:
-                      if (!Kakusan && Syuugou) charaShot[i].set({
-                        x: chara.position.x + SAB2,
-                        y: chara.position.y - SAB2
-                      }, Sabchara, -SAB2 / 7, SAB2 / 7);
-                      break;
-                    case 31:
-                      if (!Kakusan && Syuugou) charaShot[i].set({
-                        x: chara.position.x,
-                        y: chara.position.y
-                      }, Sabchara, -3, 0);
-                      break;
-                    case 32:
-                      if (!Syuugou && Kakusan) charaShot[i].set({
-                        x: chara.position.x - SAB2,
-                        y: chara.position.y - SAB2
-                      }, Sabchara, SAB2 / 7, SAB2 / 7);
-                      break;
-                    case 33:
-                      if (!Syuugou && Kakusan) charaShot[i].set({
-                        x: chara.position.x - SAB2,
-                        y: chara.position.y + SAB2 * 2.5
-                      }, Sabchara, SAB2 / (6 * 2), -(SAB2 * 2.5) / (6 * 2));
-                      break;
-                    case 34:
-                      if (!Syuugou && Kakusan) charaShot[i].set({
-                        x: chara.position.x - SAB2,
-                        y: chara.position.y - SAB2 * 2.5
-                      }, Sabchara, -SAB2 / -(6 * 2), (SAB2 * 2.5) / (6 * 2));
-                      break;
-                    case 35:
-                      if (!Syuugou && Kakusan) charaShot[i].set({
-                        x: chara.position.x - SAB2,
-                        y: chara.position.y + SAB2
-                      }, Sabchara, SAB2 / 7, -SAB2 / 7);
-                      break;
-                    case 36:
-                      if (!Syuugou && Kakusan) charaShot[i].set({
-                        x: chara.position.x,
-                        y: chara.position.y
-                      }, Sabchara, 3, 0);
-                    default:
-                      break;
-                  }
-                  Count++;
-                  if (Count > 36) break;
+                  default:
+                    break;
                 }
+                Count++;
+                if (Count > 45) break;
               }
-
             }
-            SHOT_counter++;
-            // fire = false;
+
           }
+          SHOT_counter++;
+          // fire = false;
         }
         // JIKI Shot
         ctx.fillStyle = CHARA_SHOT_COLOR;
@@ -751,28 +671,41 @@ window.onload = function () {
           if (counter % 10 === 0) {
             for (i = 0; i < BOSS_MAX_COUNT; i++) {
               if (!boss[i].alive) {
-                j = (counter % 30) / 10; // タイプを決定するパラメータを算出
+                j = (counter % 30) / 10;
                 var bossSize = 20;
-                // p.x = (screenCanvas.width - bossSize) / 2;
-                // p.y = (screenCanvas.height - bossSize) / 2;
                 if (j == 0 && boss.some((v) => v.type == 0 && v.alive)) break;
                 if ((j == 1 || j == 2) && ((counter % 60 != 0) || Math.random() > 1)) break;
-                boss[i].set(p, bossSize, j << 0); // エネミーを新規にセット
-                break; // 1体出現させたのでループを抜ける
+                boss[i].set(p, bossSize, j << 0);
+                break;
               }
             }
           }
         }
         // BOSSの挙動----------------------------------------------
         if (BOSS_SABHP == 4) {
+          //Bossshot-----------------------------
+          ctx.fillStyle = BOSS_SHOT_COLOR;
+          ctx.beginPath();
+          for (i = 0; i < BOSS_SHOT_MAX_COUNT; i++) {
+            if (bossShot[i].alive) // continue;
+            {
+              bossShot[i].move();
+              //console.log("bossShot 描画");
+              ctx.arc(
+                bossShot[i].position.x,
+                bossShot[i].position.y,
+                bossShot[i].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          //Boss本体-------------------------------------------F
+          ctx.fill();
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            // エネミーの生存フラグをチェック
             if (boss[i].alive) {
-              // エネミーを動かす
-              /* boss[i].move();*/
-              // エネミーを描くパスを設定
               ctx.arc(
                 boss[i].position.x,
                 boss[i].position.y,
@@ -780,7 +713,6 @@ window.onload = function () {
                 0, Math.PI * 2, false
               );
               /*boss[i].param++;*/
-              // ショットを打つかどうかパラメータの値からチェック                               
               if ( /*SHOT_*/ bosscounter % 30 == 0) {
                 a = boss[i].position.distance(chara.position);
                 a.normalize();
@@ -825,47 +757,23 @@ window.onload = function () {
                   size: 5,
                   speed: 1.25
                 }];
-
                 let vectorCounter = 0;
-                // エネミーショットを調査する
                 for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
                   if (!bossShot[j].alive) {
                     if (boss[i].type == 0) {
-                      // エネミーショットを新規にセットする
-
                       bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　 // 1個出現させたのでループを抜ける
+                  }　
                 }
               }
               /*SHOT_*/
               bosscounter++;
-              // パスをいったん閉じる
               ctx.closePath();
             }
             ctx.fill();
-            // Boss の移動,球の発射,敵の表示
           }
-
-          ctx.fillStyle = BOSS_SHOT_COLOR;
-          ctx.beginPath();
-          for (i = 0; i < BOSS_SHOT_MAX_COUNT; i++) {
-            if (bossShot[i].alive) // continue;
-            {
-              bossShot[i].move();
-              //console.log("bossShot 描画");
-              ctx.arc(
-                bossShot[i].position.x,
-                bossShot[i].position.y,
-                bossShot[i].size,
-                0, Math.PI * 2, false
-              );
-              ctx.closePath();
-            }
-          }
-          ctx.fill();
         }; //Boss4
 
         if (BOSS_SABHP == 3) {
@@ -922,75 +830,7 @@ window.onload = function () {
               ctx.closePath();
             }
           }
-          ctx.fill();
-          //bossenemy-----------------------------------------------------------
-          {
-            /*if (bossSABc == true) {
-              BOSSSAB_MAX_COUNT = 10000;
-            };*/
-            counter++;
-            if (counter % 40 === 0) {
-              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
-                if (!bossenemy1[i].alive) {
-                  j = (counter % 80) / 40;
-                  var bossenemy1Size = 10;
-                  if (j == 1) p.x = screenCanvas.width / 6 * 5;
-                  p.x = screenCanvas.width / 6,
-                    p.y = screenCanvas.height / 4,
-                    bossenemy1[i].set(p, bossenemy1Size, j << 0);
-                  break;
-                }
-              }
-              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
-                if (!bossenemy1[i].alive) {
-                  j = (counter % 80) / 40;
-                  var bossenemy1Size = 10;
-                  if (j == 1) p.x = screenCanvas.width / 6;
-                  p.x = screenCanvas.width / 6 * 5,
-                    p.y = screenCanvas.height / 4,
-                    bossenemy1[i].set(p, bossenemy1Size, j << 0);
-                  break;
-                }
-              }
-            } {
-              ctx.fillStyle = BOSSENEMY_COLOR;
-              ctx.beginPath();
-              for (i = 0; i < BOSSENEMY_MAX_COUNT; i++) {
-                if (bossenemy1[i].alive) {
-                  bossenemy1[i].move();
-                  ctx.arc(
-                    bossenemy1[i].position.x,
-                    bossenemy1[i].position.y,
-                    bossenemy1[i].size,
-                    0, Math.PI * 2, false
-                  );
-                  bossenemy1[i].param++;
-                  if (bossenemy1[i].param % 100 === 0) {
-                    for (j = 0; j < BOSSENEMY_SHOT_MAX_COUNT; j++) {
-                      if (!bossenemy1[j].alive) {
-                        if (bossenemy1Shot[i].type == 0) {
-                          p = bossenemy1[i].position.distance(chara.position);
-                          p.normalize();
-                          bossenemy1Shot[j].set(bossenemy1[i].position, {
-                            x: 1.5,
-                            y: -1.5
-                          }, 5, 3);
-                        } else {
-                          bossenemy1Shot[j].set(bossenemy1[i].position, {
-                            x: -1.5,
-                            y: -1.5
-                          }, 5, 3);
-                        }
-                        break;　
-                      }
-                    }
-                  }
-                  ctx.closePath();
-                }
-              }
-              ctx.fill();
-            }
-          } {
+          ctx.fill(); {
             //bossSAB-------------------------------------------------------------
             if (bossSAB[0].position.x <= screenCanvas.width / 2) {
               bossSABa = true;
@@ -1042,7 +882,6 @@ window.onload = function () {
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            // エネミーの生存フラグをチェック
             if (boss[i].alive) {
               boss[i].move();
               ctx.arc(
@@ -1052,7 +891,6 @@ window.onload = function () {
                 0, Math.PI * 2, false
               );
               /*boss[i].param++;*/
-              // ショットを打つかどうかパラメータの値からチェック                               
               if ( /*SHOT_*/ bosscounter % 30 == 0) {
                 a = boss[i].position.distance(chara.position);
                 a.normalize();
@@ -1064,24 +902,20 @@ window.onload = function () {
                 }];
 
                 let vectorCounter = 0;
-                // エネミーショットを調査する
                 for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
                   if (!bossShot[j].alive) {
                     if (boss[i].type == 0) {
-                      // エネミーショットを新規にセットする
                       bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　 // 1個出現させたのでループを抜ける
+                  }　
                 }
               }
               bosscounter++;
-              // パスをいったん閉じる
               ctx.closePath();
             }
             ctx.fill();
-            // Boss の移動,球の発射,敵の表示
           }
 
           ctx.fillStyle = BOSS_SHOT_COLOR;
@@ -1106,11 +940,8 @@ window.onload = function () {
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            // エネミーの生存フラグをチェック
             if (boss[i].alive) {
-              // エネミーを動かす
               /* boss[i].move();*/
-              // エネミーを描くパスを設定
               ctx.arc(
                 boss[i].position.x,
                 boss[i].position.y,
@@ -1118,7 +949,6 @@ window.onload = function () {
                 0, Math.PI * 2, false
               );
               /*boss[i].param++;*/
-              // ショットを打つかどうかパラメータの値からチェック                               
               if ( /*SHOT_*/ bosscounter % 30 == 0) {
                 a = boss[i].position.distance(chara.position);
                 a.normalize();
@@ -1130,25 +960,20 @@ window.onload = function () {
                 }];
 
                 let vectorCounter = 0;
-                // エネミーショットを調査する
                 for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
                   if (!bossShot[j].alive) {
                     if (boss[i].type == 0) {
-                      // エネミーショットを新規にセットする
-
                       bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　 // 1個出現させたのでループを抜ける
+                  }　
                 }
               }
               bosscounter++;
-              // パスをいったん閉じる
               ctx.closePath();
             }
             ctx.fill();
-            // Boss の移動,球の発射,敵の表示
           }
 
           ctx.fillStyle = BOSS_SHOT_COLOR;
@@ -1174,7 +999,7 @@ window.onload = function () {
     info.innerText = "Score : " + point + " || " + "Life : " + life + "\\" + BOSS_SABHP;
     info_2.innerText = "Boss : " + BOSS_COUNTER + " || " + "BOSS_HP : " + BOSS_HP;
     if (BOSS_SABHP == 4) {
-      if (BOSS_HP <= 150) {
+      if (BOSS_HP <= 200) {
         BOSS_SABHP = 3;
         point += 100
       }
@@ -1184,14 +1009,15 @@ window.onload = function () {
         BOSS_SABHP = 2;
         point += 150;
         BOSS_MAX_COUNT = 1;
-        BOSS_HP = 450;
-        BOSS_COUNTER = "式神";
+        BOSS_HP = 400;
         boss[0].alive = false;
         ChangeColor();
       }
     }
     if (BOSS_SABHP == 2) {
-      if (BOSS_HP <= 250) {
+      JIKIshotpar = 20;
+      BOSS_COUNTER = "式神";
+      if (BOSS_HP <= 200) {
         BOSS_SABHP = 1;
         point += 200
       }
@@ -1258,7 +1084,7 @@ function keyDown(event) {
   if (event.altKey && event.ctrlKey) {
     IsCheating = true;
   }
-  if (ck === 16)
+  if (ck === 96)
     IsSlow = true;
 
   if (event.shiftKey && event.ctrlKey) {
@@ -1267,11 +1093,27 @@ function keyDown(event) {
   if (event.ctrlKey && ck === 90) {
     Wascheating = true;
   }
-  if (ck === 38) {
+  if (ck === Nfrontshot) {
     Syuugou = true;
   }
-  if (ck === 40) {
+  if (ck === Nbehindshot) {
     Kakusan = true;
+  }
+  if (ck === Nrightshot) {
+    rightshot = true
+  }
+  if (ck === Nleftshot) {
+    leftshot = true;
+  }
+  if (ck === 103 && 105) {
+    up = 87;
+    down = 83;
+    right = 68;
+    left = 65;
+    Nfrontshot = 38;
+    Nbehindshot = 40;
+    Nrightshot = 39;
+    Nleftshot = 65;
   }
 }
 
@@ -1285,19 +1127,10 @@ function keyUp(event) {
     mouseUp();
     return;
   }
-  if (ck === 16) {
+  if (ck === 96) {
     IsSlow = false;
     return;
   }
-  if (ck === 38) {
-    Syuugou = false;
-    return;
-  }
-  if (ck === 40) {
-    Kakusan = false;
-    return;
-  }
-  Key = 0;
   // チート
   if ((ck === 17) && (18)) {
     IsCheating = false;
@@ -1308,6 +1141,21 @@ function keyUp(event) {
   if (event.ctrlKey && ck === 90) {
     Wascheating = false;
   }
+  if (ck === Nfrontshot) {
+    Syuugou = false;
+    return;
+  }
+  if (ck === Nbehindshot) {
+    Kakusan = false;
+    return;
+  }
+  if (ck === Nrightshot) {
+    rightshot = false
+  }
+  if (ck === Nleftshot) {
+    leftshot = false;
+  }
+  Key = 0;
 }
 
 function ChangeColor() {

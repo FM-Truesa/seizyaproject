@@ -9,7 +9,7 @@ Character.prototype.init = function (size) {
 };
 
 //character shot-----------------------------------------------
-function CharacterShot() {
+function CharaShot() {
     this.position = new Point();
     this.size = 0;
     this.speedx = 0;
@@ -17,7 +17,7 @@ function CharacterShot() {
     this.alive = false;
 }
 
-CharacterShot.prototype.set = function (p, size, speedx, speedy) {
+CharaShot.prototype.set = function (p, size, speedx, speedy) {
     this.position.x = p.x;
     this.position.y = p.y;
     this.size = size;
@@ -26,11 +26,17 @@ CharacterShot.prototype.set = function (p, size, speedx, speedy) {
     this.alive = true;
 };
 
-CharacterShot.prototype.move = function () {
+CharaShot.prototype.move = function () {
     this.position.y -= this.speedy;
     this.position.x -= this.speedx;
-    if (this.position.y < -this.size)
+    if (this.position.y <= 0)
         this.alive = false;
+    else if (screenCanvas.height <= this.position.y)
+        this.alive = false
+    else if (this.position.x <= 0)
+        this.alive = false;
+    else if (screenCanvas.width <= this.position.x)
+        this.alive = false
 };
 // - enemy-------------------------------------------------------------
 function Enemy() {
@@ -184,63 +190,3 @@ BossSAB.prototype.move = function () {
             break;
     }
 };
-// - bossenemy1-------------------------------------------------------------
-function BossEnemy1() {
-    this.position = new Point();
-    this.size = 100;
-    this.type = 0;
-    this.param = 0;
-    this.alive = false;
-}
-
-BossEnemy1.prototype.set = function (p, size, type) {
-    this.position.x = p.x;
-    this.position.y = p.y;
-    this.size = size;
-    this.type = type;
-    this.param = 0;
-    this.alive = true;
-};
-
-BossEnemy1.prototype.move = function () {
-    this.param++;
-    switch (this.type) {
-        case 0:
-            this.position.y += 3;
-            if (this.position.y > this.size + screenCanvas.height)
-                this.alive = false;
-            break;
-    }
-};
-// bossenemy1 shot-------------------------
-{
-    function BossEnemy1Shot() {
-        this.position = new Point();
-        this.vector = new Point();
-        this.size = 0;
-        this.speed = 0;
-        this.alive = false;
-    }
-    BossEnemy1Shot.prototype.set = function (p, vector, size, speed) {
-        this.position.x = p.x;
-        this.position.y = p.y;
-        this.vector.x = vector.x;
-        this.vector.y = vector.y;
-        this.size = size;
-        this.speed = speed;
-        this.alive = true;
-    };
-
-    BossEnemy1Shot.prototype.move = function () {
-        this.position.x += this.vector.x * this.speed;
-        this.position.y += this.vector.y * this.speed;
-        if (
-            //this.position.x < -this.size ||
-            this.position.y < -this.size ||
-            //this.position.x > this.size + screenCanvas.width ||
-            this.position.y > this.size + screenCanvas.height
-        ) {
-            this.alive = false;
-        }
-    };
-}
