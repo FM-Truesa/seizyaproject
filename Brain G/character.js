@@ -136,7 +136,6 @@ function BossShot() {
 }
 
 BossShot.prototype.set = function (p, vector, size, speed) {
-    // 座標、ベクトルをセット
     this.position.x = p.x;
     this.position.y = p.y;
     this.size = size;
@@ -145,11 +144,8 @@ BossShot.prototype.set = function (p, vector, size, speed) {
     this.alive = true;
 };
 BossShot.prototype.move = function () {
-    // 座標をベクトルに応じてspeed分だけ移動させる
     this.position.x += this.vector.x * this.speed;
     this.position.y += this.vector.y * this.speed;
-
-    // 一定以上の座標に到達していたら生存フラグを降ろす
     if (
         this.position.x < -this.size ||
         this.position.y < -this.size ||
