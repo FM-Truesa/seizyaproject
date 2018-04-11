@@ -32,6 +32,8 @@ var right = 0;
 var left = 0;
 var key7 = false;
 var key1 = false;
+var key4 = false;
+var key6 = false;
 // - const --------------------------------------------------------------------
 //Chara
 var CHARA_COLOR = 'rgba(0,0,0,1)';
@@ -835,28 +837,22 @@ window.onload = function () {
                   x: -0.8, //下左下
                   y: 1.3
                 }, {
-                  x: 0.8,
-                  　　 //下右下
+                  x: 0.8, //下右下
                   y: 1.3
                 }, {
-                  x: 0,
-                  　　　 //上
+                  x: 0, //上
                   y: -1.5
                 }, {
-                  x: 1.3,
-                  　 //上右下
+                  x: 1.3, //上右下
                   y: 0.8
                 }, {
-                  x: 1.08,
-                  　 //右上
+                  x: 1.08, //右上
                   y: -1.08
                 }, {
-                  x: -1.3,
-                  　 //上左下
+                  x: -1.3, //上左下
                   y: 0.8
                 }, {
-                  x: -1.08,
-                  　 //左上
+                  x: -1.08, //左上
                   y: -1.08
                 }, {
                   x: a.x,
@@ -1008,6 +1004,7 @@ window.onload = function () {
 
 
         if (BOSS_SABHP == 2) {
+          //Bossmain-------------------------------------------
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
@@ -1019,15 +1016,75 @@ window.onload = function () {
                 boss[i].size,
                 0, Math.PI * 2, false
               );
-              /*boss[i].param++;*/
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+
+          //Bossshot----------------------------------
+          bosscounter++;
+          for (i = 0; i < BOSS_MAX_COUNT; i++) {
+            if (boss[i].alive) // continue;
+            { /*boss[i].param++;*/
               if ( /*SHOT_*/ bosscounter % 30 == 0) {
                 a = boss[i].position.distance(chara.position);
                 a.normalize();
                 let Vectors = [{
-                  x: a.x,
-                  y: a.y,
-                  size: 5,
-                  speed: 1.25
+                  x: 1,
+                  y: 1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: 1,
+                  y: -1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: -1,
+                  y: 1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: -1,
+                  y: -1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: 1,
+                  y: 0
+                }, {
+                  x: -1,
+                  y: 0
+                }, {
+                  x: 0,
+                  y: 1
+                }, {
+                  x: 0,
+                  y: -1
+                }, {
+                  x: 1,
+                  y: 0.5
+                }, {
+                  x: 0.5,
+                  y: 1
+                }, {
+                  x: 1,
+                  y: -0.5
+                }, {
+                  x: 0.5,
+                  y: -1
+                }, {
+                  x: -1,
+                  y: 0.5
+                }, {
+                  x: -0.5,
+                  y: 1
+                }, {
+                  x: -1,
+                  y: -0.5
+                }, {
+                  x: -0.5,
+                  y: -1
                 }];
 
                 let vectorCounter = 0;
@@ -1036,31 +1093,26 @@ window.onload = function () {
                     if (boss[i].type == 0) {
                       bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
+                      // console.log(vectorCounter,bossShot[j]);
                       if (vectorCounter >= Vectors.length) break;
                     }
                   }　
                 }
+                //console.log("a");
               }
-              bosscounter++;
-              ctx.closePath();
             }
-            ctx.fill();
           }
-
           ctx.fillStyle = BOSS_SHOT_COLOR;
           ctx.beginPath();
-          for (i = 0; i < BOSS_SHOT_MAX_COUNT; i++) {
-            if (bossShot[i].alive) // continue;
-            {
-              bossShot[i].move();
-              ctx.arc(
-                bossShot[i].position.x,
-                bossShot[i].position.y,
-                bossShot[i].size,
-                0, Math.PI * 2, false
-              );
-              ctx.closePath();
-            }
+          for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
+            bossShot[j].move();
+            ctx.arc(
+              bossShot[j].position.x,
+              bossShot[j].position.y,
+              bossShot[j].size,
+              0, Math.PI * 2, false
+            );
+          ctx.closePath();
           }
           ctx.fill();
         }; //Boss2
@@ -1104,23 +1156,6 @@ window.onload = function () {
             }
             ctx.fill();
           }
-
-          ctx.fillStyle = BOSS_SHOT_COLOR;
-          ctx.beginPath();
-          for (i = 0; i < BOSS_SHOT_MAX_COUNT; i++) {
-            if (bossShot[i].alive) // continue;
-            {
-              bossShot[i].move();
-              ctx.arc(
-                bossShot[i].position.x,
-                bossShot[i].position.y,
-                bossShot[i].size,
-                0, Math.PI * 2, false
-              );
-              ctx.closePath();
-            }
-          }
-          ctx.fill();
         }; //Boss1
 
       }
@@ -1166,6 +1201,27 @@ window.onload = function () {
 
   })();
 };
+//ope-2 -----------------------------------------------------------------
+function B0() {
+  BOSS_SABHP = 1;
+  BOSS_HP = 0;
+}
+
+function B1() {
+  BOSS_SABHP = 1;
+}
+
+function B2() {
+  BOSS_SABHP = 2;
+}
+
+function B3() {
+  BOSS_SABHP = 3;
+}
+
+function B4() {
+  BOSS_SABHP = 4;
+}
 // - event --------------------------------------------------------------------
 function mouseMove(event) {
   mouse.x = event.clientX - screenCanvas.offsetLeft;
@@ -1247,6 +1303,31 @@ function keyDown(event) {
       }
     }
   }
+  if (ck === 100) {
+    key4 = true;
+  }
+  if (ck === 102) {
+    key6 = true;
+  }
+  if (key4) {
+    if (key6) {
+      if (ck === 48) {
+        B0()
+      }
+      if (ck === 49) {
+        B1()
+      }
+      if (ck === 50) {
+        B2()
+      }
+      if (ck === 51) {
+        B3()
+      }
+      if (ck === 52) {
+        B4()
+      }
+    }
+  }
 }
 
 function keyUp(event) {
@@ -1289,6 +1370,12 @@ function keyUp(event) {
   }
   if (ck === 103) {
     key7 = false;
+  }
+  if (ck === 100) {
+    key4 = false;
+  }
+  if (ck === 102) {
+    key6 = false;
   }
   Key = 0;
 }
