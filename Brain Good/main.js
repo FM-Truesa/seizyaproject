@@ -13,26 +13,28 @@ var Arecheating = false;
 var Wascheating = false;
 var Key = 0;
 var IsSlow = false;
-var ENEMY_SHOT_COLOR = 'rgba(0, 50, 255, 1)';
+var ENEMY_SHOT_COLOR = 'rgba(80,150,50 , 1)';
 var ENEMY_SHOT_MAX_COUNT = 10000;
 var point = 0;
 var life = 5;
 var invincible = false;
 // - const --------------------------------------------------------------------
-var CHARA_COLOR = 'rgba(255, 160, 180, 0.8)';
+var CHARA_COLOR　 //下に
 var CHARA_SHOT_COLOR = 'rgba(200, 50, 0, 1)';
 var CHARA_SHOT_MAX_COUNT = 1000;
-var ENEMY_COLOR = 'rgba(10, 100, 230, 0.6)';
+var ENEMY_COLOR = 'rgba(50,200,50 , 0.8)';
 var ENEMY_MAX_COUNT = 100;
 
 // - main ---------------------------------------------------------------------
 window.onload = function () {
+    var img = new Image();
+    img.src = "../Brain G/back4.bmp";
     var i, j;
     var p = new Point();
 
     screenCanvas = document.getElementById('screen');
-    screenCanvas.width = 1350;
-    screenCanvas.height = 600;
+    screenCanvas.width = 1364;
+    screenCanvas.height = 650;
     ctx = screenCanvas.getContext('2d');
     screenCanvas.addEventListener('mousemove', mouseMove, true);
     screenCanvas.addEventListener('mousedown', mouseDown, true);
@@ -62,7 +64,10 @@ window.onload = function () {
         slowCount++;
         if (!IsSlow || slowCount % 5 == 0) {
             ctx.clearRect(0, 0, screenCanvas.width, screenCanvas.height);
-
+            ctx.globalCompositeOperation = "source-over";
+            ctx.globalAlpha = .5;
+            ctx.drawImage(img, 0, 0, screenCanvas.width, screenCanvas.width);
+            ctx.globalAlpha = 1;
             // - 自機 ---------------------------------------------------------------
             ctx.beginPath();
             if (IsCheating) {
@@ -117,10 +122,10 @@ window.onload = function () {
                                     charaShot[i].set(chara.position, 3, 0, 3);
                                     break;
                                 case 1:
-                                    if (Arecheating)charaShot[i].set(chara.position, 3, 1, 3);
+                                    if (Arecheating) charaShot[i].set(chara.position, 3, 1, 3);
                                     break;
                                 case 2:
-                                    if (Arecheating)charaShot[i].set(chara.position, 3, -1, 3);
+                                    if (Arecheating) charaShot[i].set(chara.position, 3, -1, 3);
                                     break;
                                 case 3:
                                     if (Arecheating) charaShot[i].set(chara.position, 3, 3, 3);
@@ -220,8 +225,8 @@ window.onload = function () {
                     for (j = 0; j < ENEMY_SHOT_MAX_COUNT; j++) {
                         if (!enemyShot[j].alive) continue;
                         if (Math.pow(chara.position.x - enemyShot[j].position.x, 2) +
-                            Math.pow(chara.position.y - enemyShot[j].position.y, 2)
-                            <= Math.pow(enemyShot[j].size + chara.size, 2)) {
+                            Math.pow(chara.position.y - enemyShot[j].position.y, 2) <=
+                            Math.pow(enemyShot[j].size + chara.size, 2)) {
                             life -= 1;
                             invincible = true;
                             chara.position.x = 675;
@@ -236,8 +241,8 @@ window.onload = function () {
                     for (j = 0; j < ENEMY_MAX_COUNT; j++) {
                         if (!enemy[j].alive) continue;
                         if (Math.pow(chara.position.x - enemy[j].position.x, 2) +
-                            Math.pow(chara.position.y - enemy[j].position.y, 2)
-                            <= Math.pow(enemy[j].size + chara.size, 2)) {
+                            Math.pow(chara.position.y - enemy[j].position.y, 2) <=
+                            Math.pow(enemy[j].size + chara.size, 2)) {
                             life -= 1;
                             invincible = true;
                             chara.position.x = 675;
@@ -250,7 +255,8 @@ window.onload = function () {
                         }
                     }
                 }
-            } ChangeColor();
+            }
+            ChangeColor();
 
 
 
@@ -313,7 +319,10 @@ window.onload = function () {
                                     p.normalize();
                                     enemyShot[j].set(enemy[i].position, p, 8, 5);
                                 } else {
-                                    enemyShot[j].set(enemy[i].position, { x: 0, y: 1.5 }, 8, 5);
+                                    enemyShot[j].set(enemy[i].position, {
+                                        x: 0,
+                                        y: 1.5
+                                    }, 8, 5);
                                 }
                                 // 1個出現させたのでループを抜ける
                                 break;
@@ -348,8 +357,8 @@ window.onload = function () {
                 for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
                     if (!charaShot[i].alive) continue;
                     if (Math.pow(enemy[i].position.x - charaShot[j].position.x, 2) +
-                        Math.pow(enemy[i].position.y - charaShot[j].position.y, 2)
-                        <= Math.pow(charaShot[j].size + enemy[i].size, 2)) {
+                        Math.pow(enemy[i].position.y - charaShot[j].position.y, 2) <=
+                        Math.pow(charaShot[j].size + enemy[i].size, 2)) {
                         enemy[i].alive = false;
                         charaShot[j].alive = false;
                         point += 100;
@@ -358,12 +367,12 @@ window.onload = function () {
             }
         }
         info.innerHTML = "Score" + point + "||" + "Life" + life;
-        if(life<0){
+        if (life < 0) {
             // 死んでる
-            ShowGameover("Score || "+point);
-        }else{
+            ShowGameover("Score || " + point);
+        } else {
             requestAnimationFrame(arguments.callee);
-         }
+        }
     })();
 };
 
@@ -377,6 +386,7 @@ function mouseDown(event) {
     fire = true;
     SHOT_counter = 0;
 }
+
 function mouseUp(event) {
     fire = false;
 }
@@ -416,6 +426,7 @@ function keyDown(event) {
     }
 
 }
+
 function keyUp(event) {
     var ck = event.keyCode;
     if (ck === 32) {
@@ -442,16 +453,17 @@ function keyUp(event) {
         Wascheating = false;
     }
 }
+
 function ChangeColor() {
-    if (invincible) { CHARA_COLOR = 'rgba(255, 160, 180, 0.5)'; }
-    else if (Wascheating) { CHARA_COLOR = 'rgba(50, 255, 50, 0.5)'; }
-    else CHARA_COLOR = 'rgba(255, 160, 180, 0.8)';
+    if (invincible) {
+        CHARA_COLOR = 'rgba(240, 150, 170, 0.8)';
+    } else if (Wascheating) {
+        CHARA_COLOR = 'rgba(50, 50, 255, 1)';
+    } else CHARA_COLOR = 'rgba(255, 100, 120, 0.8)';
 }
+
 function ShowGameover(text) {
     document.getElementById("gameover-wrap").classList.remove("hide");
     document.getElementById("gameover-wrap").classList.add("shown");
     document.getElementById("gameover-text").innerText = text;
 }
-
-
-

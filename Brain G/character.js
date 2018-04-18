@@ -155,6 +155,35 @@ BossShot.prototype.move = function () {
         this.alive = false;
     }
 };
+// boss shot2-------------------------
+function BossShot2() {
+    this.position = new Point();
+    this.vector = new Point();
+    this.size = 0;
+    this.speed = 0;
+    //this.alive = false;
+}
+
+BossShot2.prototype.set = function (p, vector, size, speed) {
+    this.position.x = p.x;
+    this.position.y = p.y;
+    this.size = size;
+    this.speed = speed;
+    this.vector = vector;
+    this.alive = true;
+};
+BossShot2.prototype.move = function () {
+    this.position.x += this.vector.x * this.speed;
+    this.position.y += this.vector.y * this.speed;
+    if (
+        this.position.x < -this.size ||
+        this.position.y < -this.size ||
+        this.position.x > this.size + screenCanvas.width ||
+        this.position.y > this.size + screenCanvas.height
+    ) {
+        this.alive = false;
+    }
+};
 // - BossSAB-------------------------------------------------------------
 function BossSAB() {
     this.position = new Point();

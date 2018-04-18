@@ -18,7 +18,7 @@ var Wascheating = false;
 var waschea = false;
 var Key = 0;
 var Music = false;
-var point = 0;
+var Score = 0;
 var invincible = false;
 //count-------------------------------------------
 var bossSABcounter = 0;
@@ -38,8 +38,8 @@ var key6 = false;
 //Chara
 var CHARA_COLOR = 'rgba(0,0,0,1)';
 var CHARA_SHOT_COLOR = 'rgba(255,255,255, 1)';
-var life = 5;
 var CHARA_SHOT_MAX_COUNT = 10000;
+var life = 5;
 var Kakusan = false;
 var Syuugou = false;
 var rightshot = 0;
@@ -58,12 +58,14 @@ var ENEMY_SHOT_COLOR = 'rgba(0, 50, 255, 1)';
 var ENEMY_SHOT_MAX_COUNT = 1000;
 var ENEMY_MAX_COUNT = 100;
 //Boss
-var BOSS_COLOR = 'rgba(35, 71, 130,0.8)';
-var BOSS_SHOT_COLOR = 'rgba(255,255,0,1)';
 var BOSS_HP = 400;
 var BOSS_SABHP = 4;
+var BOSS_COLOR = 'rgba(35, 71, 130,0.8)';
 var BOSS_MAX_COUNT = 2;
+var BOSS_SHOT_COLOR = 'rgba(255,255,0,1)';
 var BOSS_SHOT_MAX_COUNT = 10000;
+var BOSS_SHOT2_COLOR = 'rgba(217,66,54,0.9)';
+var BOSS_SHOT2_MAX_COUNT = 10000;
 var BOSS_COUNTER = "妖狐";
 //BossSAB
 var BOSSSAB_MAX_COUNT = 2;
@@ -77,7 +79,7 @@ var JIKI_OKURETERU = {
 window.onload = function () {
   var img = new Image();
   img.src = "back9.bmp";
-  var i, j;
+  var i, j, k;
   var p = new Point(); {
     screenCanvas = document.getElementById('screen');
     screenCanvas.width = 1364;
@@ -91,7 +93,8 @@ window.onload = function () {
     info = document.getElementById('info');
     info_2 = document.getElementById('info_2');
   }
-  // - ショット用インスタンス-------------------------------
+  // - ショット用インスタンス-------------------------------  
+  var bossCount = 0;
   var charaShot = new Array(CHARA_SHOT_MAX_COUNT);
   for (i = 0; i < charaShot.length; i++)
     charaShot[i] = new CharaShot();
@@ -101,7 +104,9 @@ window.onload = function () {
   var bossShot = new Array(BOSS_SHOT_MAX_COUNT);
   for (i = 0; i < bossShot.length; i++)
     bossShot[i] = new BossShot();
-  var bossCount = 0;
+  var bossShot2 = new Array(BOSS_SHOT2_MAX_COUNT);
+  for (k = 0; k < bossShot2.length; k++)
+    bossShot2[k] = new BossShot2();
 
   // - キャラクター用インスタンス-------------------------------
   var chara = new Character();
@@ -185,14 +190,14 @@ window.onload = function () {
           }
         }
         // JIKI描画
-        if (point < -Infinity) {
+        if (Score < -Infinity) {
           outcharacter = 10;
           chara.size = outcharacter / 10 * 4;
           Sabchara = outcharacter / 2;
           Saboutchara = Sabchara / 2;
         }
 
-        if (point > -Infinity) {
+        if (Score > -Infinity) {
           if (BOSS_SABHP >= 3) {
             outcharacter = 10;
             chara.size = outcharacter / 10 * 4;
@@ -593,7 +598,7 @@ window.onload = function () {
         ctx.fill();
       }
       //雑魚敵
-      if (point < -Infinity) {
+      if (Score < -Infinity) {
         //以下エネミーとのあたり判定 
         if (!Wascheating && !invincible) {
           for (j = 0; j < ENEMY_SHOT_MAX_COUNT; j++) {
@@ -610,7 +615,7 @@ window.onload = function () {
               invincible = false;
             }, 3000);
             enemyShot[j].alive = false;
-            point -= 1000;
+            Score -= 1000;
           }
         } // enemyShot と　chara の当り判定
         for (j = 0; j < ENEMY_MAX_COUNT; j++) {
@@ -626,7 +631,7 @@ window.onload = function () {
               invincible = false;
             }, 3000);
             enemy[j].alive = false;
-            point -= 1000;
+            Score -= 1000;
           }
         } // enemy と　chara の当り判定
 
@@ -639,7 +644,7 @@ window.onload = function () {
               Math.pow(charaShot[j].size + enemy[i].size, 2)) {
               enemy[i].alive = false;
               charaShot[j].alive = false;
-              point += 50;
+              Score += 50;
             }
           }
         } //以上 
@@ -712,7 +717,7 @@ window.onload = function () {
           ctx.fill();
         } // 敵のたまの移動、表示
 
-      } else if (point > -Infinity) {
+      } else if (Score > -Infinity) {
         if (!Wascheating && !invincible) {
           for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
             if (!bossShot[j].alive) continue;
@@ -721,13 +726,25 @@ window.onload = function () {
               Math.pow(bossShot[j].size + chara.size, 2)) {
               life -= 1;
               invincible = true;
-              /*chara.position.x = 675;
-              chara.position.y = 500;*/
               setTimeout(function () {
                 invincible = false;
               }, 3000);
               bossShot[j].alive = false;
-              point -= 1000;
+              Score -= 1000;
+            }
+          }
+          for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+            if (!bossShot2[k].alive) continue;
+            if (Math.pow(chara.position.x - bossShot2[k].position.x, 2) +
+              Math.pow(chara.position.y - bossShot2[k].position.y, 2) <=
+              Math.pow(bossShot2[k].size + chara.size, 2)) {
+              life -= 1;
+              invincible = true;
+              setTimeout(function () {
+                invincible = false;
+              }, 3000);
+              bossShot2[k].alive = false;
+              Score -= 1000;
             }
           }
           for (j = 0; j < BOSS_MAX_COUNT; j++) {
@@ -743,7 +760,7 @@ window.onload = function () {
                 invincible = false;
               }, 3000);
               BOSS_HP -= 10;
-              point += 1000;
+              Score += 1000;
             }
           }
         }
@@ -1004,52 +1021,15 @@ window.onload = function () {
 
 
         if (BOSS_SABHP == 2) {
-          //Bossmain-------------------------------------------
-          ctx.fillStyle = BOSS_COLOR;
-          ctx.beginPath();
-          for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            if (boss[i].alive) {
-              boss[i].move();
-              ctx.arc(
-                boss[i].position.x,
-                boss[i].position.y,
-                boss[i].size,
-                0, Math.PI * 2, false
-              );
-              ctx.closePath();
-            }
-          }
-          ctx.fill();
-
           //Bossshot----------------------------------
           bosscounter++;
           for (i = 0; i < BOSS_MAX_COUNT; i++) {
             if (boss[i].alive) // continue;
             { /*boss[i].param++;*/
-              if ( /*SHOT_*/ bosscounter % 30 == 0) {
-                a = boss[i].position.distance(chara.position);
-                a.normalize();
+              if ( /*SHOT_*/ bosscounter % 50 == 0) {
+                /*a = boss[i].position.distance(chara.position);
+                a.normalize();*/
                 let Vectors = [{
-                  x: 1,
-                  y: 1,
-                  size: 8,
-                  speed: 4
-                }, {
-                  x: 1,
-                  y: -1,
-                  size: 8,
-                  speed: 4
-                }, {
-                  x: -1,
-                  y: 1,
-                  size: 8,
-                  speed: 4
-                }, {
-                  x: -1,
-                  y: -1,
-                  size: 8,
-                  speed: 4
-                }, {
                   x: 1,
                   y: 0
                 }, {
@@ -1100,21 +1080,99 @@ window.onload = function () {
                 }
                 //console.log("a");
               }
+              if ( /*SHOT_*/ bosscounter % 100 == 0) {
+                a = boss[i].position.distance(chara.position);
+                a.normalize();
+                let Vectors = [{
+                  x: 1,
+                  y: 1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: 1,
+                  y: -1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: -1,
+                  y: 1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: -1,
+                  y: -1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: a.x,
+                  y: a.y,
+                  size: 8,
+                  speed: 4
+                }];
+
+                let vectorCounter = 0;
+                for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+                  if (!bossShot2[k].alive) {
+                    if (boss[i].type == 0) {
+                      bossShot2[k].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                      vectorCounter++;
+                      // console.log(vectorCounter,bossShot[k]);
+                      if (vectorCounter >= Vectors.length) break;
+                    }
+                  }　
+                }
+                //console.log("a");
+              }
             }
           }
           ctx.fillStyle = BOSS_SHOT_COLOR;
           ctx.beginPath();
           for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-            bossShot[j].move();
-            ctx.arc(
-              bossShot[j].position.x,
-              bossShot[j].position.y,
-              bossShot[j].size,
-              0, Math.PI * 2, false
-            );
-          ctx.closePath();
+            if (bossShot[j].alive) {
+              bossShot[j].move();
+              ctx.arc(
+                bossShot[j].position.x,
+                bossShot[j].position.y,
+                bossShot[j].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
           }
           ctx.fill();
+
+          ctx.fillStyle = BOSS_SHOT2_COLOR;
+          ctx.beginPath();
+          for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+            if (bossShot2[k].alive) {
+              bossShot2[k].move();
+              ctx.arc(
+                bossShot2[k].position.x,
+                bossShot2[k].position.y,
+                bossShot2[k].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          //Bossmain-------------------------------------------
+          ctx.fillStyle = BOSS_COLOR;
+          ctx.beginPath();
+          for (i = 0; i < BOSS_MAX_COUNT; i++) {
+            if (boss[i].alive) {
+              boss[i].move();
+              ctx.arc(
+                boss[i].position.x,
+                boss[i].position.y,
+                boss[i].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+
         }; //Boss2
 
         if (BOSS_SABHP == 1) {
@@ -1160,18 +1218,34 @@ window.onload = function () {
 
       }
     }
-    info.innerText = "Score : " + point + " || " + "Life : " + life + "\\" + BOSS_SABHP;
+    info.innerText = "Score : " + Score + " || " + "Life : " + life + "\\" + BOSS_SABHP;
     info_2.innerText = "Boss : " + BOSS_COUNTER + " || " + "BOSS_HP : " + BOSS_HP;
+    //COLOR--------------------
+    var B_par = BOSS_HP / 400;
+    var B_parc = B_par * 255;
+    //HPBer--------------------------------------------------------------------------------------- 
+    //ctx.strokeStyle = BOSS_COLOR;    
+    if (BOSS_SABHP >= 3) {
+      ctx.fillStyle = 'rgba(0,0,' + (B_parc) + ',0.5)';
+    } //'rgba(' + (B_parc) + ',' + (B_parc) + ',' + (B_parc) + ',1)';
+    else {
+      ctx.fillStyle = 'rgba(' + (B_parc) + ',' + (B_parc) + ',0,0.5)';
+    }
+    ctx.beginPath();
+    ctx.fillRect(0, 0, B_par * screenCanvas.width, 25);
+    ctx.stroke();
+    ctx.closePath();
+
     if (BOSS_SABHP == 4) {
       if (BOSS_HP <= 200) {
         BOSS_SABHP = 3;
-        point += 100
+        Score += 100
       }
     }
     if (BOSS_SABHP == 3) {
       if (BOSS_HP <= 0) {
         BOSS_SABHP = 2;
-        point += 150;
+        Score += 150;
         BOSS_MAX_COUNT = 1;
         BOSS_HP = 400;
         boss[0].alive = false;
@@ -1181,22 +1255,23 @@ window.onload = function () {
     if (BOSS_SABHP == 2) {
       JIKIshotpar = 15;
       BOSS_COUNTER = "式神";
+      BOSS_HP = 400;
       if (BOSS_HP <= 200) {
         BOSS_SABHP = 1;
-        point += 200
+        Score += 200
       }
     }
     if (BOSS_SABHP == 1) {
       if (BOSS_HP <= 0) {
         BOSS_SABHP = 0;
-        point += 250;
+        Score += 250;
         BOSS_MAX_COUNT = 0;
         BOSS_HP = 0;
       }
     }
-    if (life < 0) ShowGameover("Score || " + point);
+    if (life < 0) ShowGameover("Score || " + Score);
     else requestAnimationFrame(arguments.callee);
-    if (BOSS_MAX_COUNT <= 0) ShowClear("GAME CLEAR\nScore||" + point);
+    if (BOSS_MAX_COUNT <= 0) ShowClear("GAME CLEAR\nScore||" + Score);
 
 
   })();
@@ -1384,10 +1459,10 @@ function ChangeColor() {
   if (invincible) {
     CHARA_COLOR = 'rgba(50, 255, 50, 0.5)';
   } else if (Wascheating) {
-    CHARA_COLOR = 'rgba(50, 255, 50, 0.5)';
+    CHARA_COLOR = 'rgba(35, 71, 130,1)'; //'rgba(50, 50, 255, 1)';
   } else CHARA_COLOR = 'rgba(0,0,0,1)';
   if (BOSS_SABHP <= 2) {
-    BOSS_COLOR = 'rgba(255,255,0,1)', BOSS_SHOT_COLOR = 'rgba(35, 71, 130,0.8)';
+    BOSS_COLOR = 'rgba(255,255,0,1)', BOSS_SHOT_COLOR = 'rgba(50,50,255,0.88)';
   }
   if (IsSlow) {
     CHARA_COLOR = 'rgba(50,50,50, 0.5)';
