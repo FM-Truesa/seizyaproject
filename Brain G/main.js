@@ -11,20 +11,18 @@ var counter = 0;
 var SHOT_counter = 0;
 var /*SHOT_*/ bosscounter = 0;
 //var chara;
-var IsSlow = false;
-var IsCheating = false;
-var Arecheating = false;
-var Wascheating = false;
-var waschea = false;
+var slow = false;
+var cca = false;
+var ccs = false;
+var c13ting = false;
+var c13 = false;
 var Key = 0;
 var Music = false;
-var Score = 0;
+var score = 0;
 var invincible = false;
 //count-------------------------------------------
-var bossSABcounter = 0;
-var bossSABa = false;
-var bossSABb = false;
-var bossSABc = false;
+var bosscounter = 0;
+var B_chenge = true;
 //operation---------------------------------------
 var up = 0;
 var down = 0;
@@ -57,19 +55,24 @@ var ENEMY_COLOR = 'rgba(10, 100, 230, 0.6)';
 var ENEMY_SHOT_COLOR = 'rgba(0, 50, 255, 1)';
 var ENEMY_SHOT_MAX_COUNT = 1000;
 var ENEMY_MAX_COUNT = 100;
-//Boss
-var BOSS_HP = 400;
-var BOSS_SABHP = 4;
+//boss
+var B_HP = 400;
+var B_SABHP = 4;
 var BOSS_COLOR = 'rgba(35, 71, 130,0.8)';
 var BOSS_MAX_COUNT = 2;
 var BOSS_SHOT_COLOR = 'rgba(255,255,0,1)';
 var BOSS_SHOT_MAX_COUNT = 10000;
 var BOSS_SHOT2_COLOR = 'rgba(217,66,54,0.9)';
 var BOSS_SHOT2_MAX_COUNT = 10000;
-var BOSS_COUNTER = "妖狐";
-//BossSAB
-var BOSSSAB_MAX_COUNT = 2;
-var BOSSSAB_COLOR = 'rgba(35, 71, 160,0.8)';
+var B_COUNT = "妖狐";
+var B_shotpx
+var B_shotpy
+var B_shotc = 0;
+var B_saba = 0;
+var B_sabb = 0;
+//Size---------------------
+var wi = window.innerWidth;
+var hi = window.innerHeight;
 
 var JIKI_OKURETERU = {
   x: undefined,
@@ -79,11 +82,13 @@ var JIKI_OKURETERU = {
 window.onload = function () {
   var img = new Image();
   img.src = "back9.bmp";
-  var i, j, k;
+  var i, j, m, k, l, n, b, h, u;
   var p = new Point(); {
     screenCanvas = document.getElementById('screen');
+    //screenCanvas.width = wi - 2;
+    //screenCanvas.height = hi -6;
     screenCanvas.width = 1364;
-    screenCanvas.height = 630;
+    screenCanvas.height = 762.5;
     ctx = screenCanvas.getContext('2d');
     screenCanvas.addEventListener('mousemove', mouseMove, true);
     screenCanvas.addEventListener('mousedown', mouseDown, true);
@@ -93,33 +98,43 @@ window.onload = function () {
     info = document.getElementById('info');
     info_2 = document.getElementById('info_2');
   }
+  c13 = true;
+  // - キャラクター用インスタンス-------------------------------
+  var chara = new Character();
+  chara.init(10);
+
+  var enemy = new Array(ENEMY_MAX_COUNT);
+  for (j = 0; j < ENEMY_MAX_COUNT; j++)
+    enemy[j] = new Enemy();
+
+  var boss = new Array(BOSS_MAX_COUNT);
+  for (b = 0; b < BOSS_MAX_COUNT; b++)
+    boss[b] = new Boss();
   // - ショット用インスタンス-------------------------------  
   var bossCount = 0;
   var charaShot = new Array(CHARA_SHOT_MAX_COUNT);
   for (i = 0; i < charaShot.length; i++)
     charaShot[i] = new CharaShot();
+
   var enemyShot = new Array(ENEMY_SHOT_MAX_COUNT);
-  for (i = 0; i < enemyShot.length; i++)
-    enemyShot[i] = new EnemyShot();
+  for (m = 0; m < enemyShot.length; m++)
+    enemyShot[m] = new EnemyShot();
+
   var bossShot = new Array(BOSS_SHOT_MAX_COUNT);
-  for (i = 0; i < bossShot.length; i++)
-    bossShot[i] = new BossShot();
+  for (l = 0; l < bossShot.length; l++)
+    bossShot[l] = new BossShot();
+
   var bossShot2 = new Array(BOSS_SHOT2_MAX_COUNT);
   for (k = 0; k < bossShot2.length; k++)
-    bossShot2[k] = new BossShot2();
+    bossShot2[k] = new BossShot3();
 
-  // - キャラクター用インスタンス-------------------------------
-  var chara = new Character();
-  chara.init(10);
-  var enemy = new Array(ENEMY_MAX_COUNT);
-  for (i = 0; i < ENEMY_MAX_COUNT; i++)
-    enemy[i] = new Enemy();
-  var boss = new Array(BOSS_MAX_COUNT);
-  for (i = 0; i < BOSS_MAX_COUNT; i++)
-    boss[i] = new Boss();
-  var bossSAB = new Array(10000);
-  for (i = 0; i < 10000; i++)
-    bossSAB[i] = new BossSAB();
+  var bossShot3 = new Array(BOSS_SHOT2_MAX_COUNT);
+  for (h = 0; h < bossShot2.length; h++)
+    bossShot3[h] = new BossShot3();
+
+  var bossShot4 = new Array(BOSS_SHOT2_MAX_COUNT);
+  for (u = 0; u < bossShot2.length; u++)
+    bossShot4[u] = new BossShot4();
   // -音楽(BGM)---------------------------------------------------------
   /* var audio = new Audio();
     audio.src = "./Dear....mp3";
@@ -129,8 +144,8 @@ window.onload = function () {
     audio.play();*/
 
 
-  chara.position.x = 675;
-  chara.position.y = 500;
+  chara.position.x = screenCanvas.width / 2;
+  chara.position.y = screenCanvas.height / 5 * 4;
   var slowCount = 0;
   (function () {
     //operation----------------------------------------------------
@@ -153,15 +168,15 @@ window.onload = function () {
       Nrightshot = 68;
       Nleftshot = 65;
     };
-    if (waschea) {
-      Wascheating = true;
+    if (c13) {
+      c13ting = true;
     } else {
-      Wascheating = false;
+      c13ting = false;
     }
     //main-------------------------------------------------------------------------
     slowCount++;
     // console.log("A");
-    if (!IsSlow || slowCount % 5 == 0) {
+    if (!slow || slowCount % 5 == 0) {
       ctx.clearRect(0, 0, screenCanvas.width, screenCanvas.height);
       ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = .5;
@@ -170,12 +185,12 @@ window.onload = function () {
       // 自機 + 自機のたま
       {
         // JIKI移動
-        if (IsCheating) {
+        if (cca) {
           chara.position.x = mouse.x;
           chara.position.y = mouse.y;
         } else {
           var speed = 5;
-          if (IsSlow) speed = 5;
+          if (slow) speed = 5;
           if (Key === right) {
             chara.position.x += speed;
           }
@@ -190,20 +205,20 @@ window.onload = function () {
           }
         }
         // JIKI描画
-        if (Score < -Infinity) {
+        if (score < -Infinity) {
           outcharacter = 10;
           chara.size = outcharacter / 10 * 4;
           Sabchara = outcharacter / 2;
           Saboutchara = Sabchara / 2;
         }
 
-        if (Score > -Infinity) {
-          if (BOSS_SABHP >= 3) {
+        if (score > -Infinity) {
+          if (B_SABHP >= 3) {
             outcharacter = 10;
             chara.size = outcharacter / 10 * 4;
             Sabchara = outcharacter / 2;
             Saboutchara = Sabchara - 0.5;
-          } else if (BOSS_SABHP <= 2) {
+          } else if (B_SABHP <= 2) {
             outcharacter = 10;
             chara.size = outcharacter / 10 * 4;
             //Sabchara = outcharacter / 3;
@@ -223,7 +238,7 @@ window.onload = function () {
         ctx.arc(chara.position.x, chara.position.y, outcharacter, 0, Math.PI * 2, false);
         ctx.fillStyle = CHARA_COLOR;
         ctx.fill();
-        if (IsSlow) {
+        if (slow) {
           ctx.beginPath();
           ctx.arc(chara.position.x, chara.position.y, outcharacter + 1, 0, Math.PI * 2, false);
           ctx.strokeStyle = 'rgba(0,0,0,1)';
@@ -236,7 +251,7 @@ window.onload = function () {
         ctx.arc(chara.position.x, chara.position.y, chara.size, 0, Math.PI * 2, false);
         ctx.fillStyle = 'rgba(255,0,0,1)';
         ctx.fill();
-        if (BOSS_SABHP >= 3) {
+        if (B_SABHP >= 3) {
           ctx.beginPath();
           ctx.arc(JIKI_OKURETERU.x + 30, JIKI_OKURETERU.y + 10, Sabchara, 0, Math.PI * 2, false);
           ctx.moveTo(JIKI_OKURETERU.x - 30 + Sabchara, JIKI_OKURETERU.y + 10);
@@ -250,7 +265,7 @@ window.onload = function () {
           JIKI_OKURETERU.x = chara.position.x;
           JIKI_OKURETERU.y = chara.position.y;
         } else {
-          if (BOSS_SABHP >= 3) {
+          if (B_SABHP >= 3) {
             JIKI_OKURETERU.x = (chara.position.x * 0.9 + JIKI_OKURETERU.x * 0.1);
             JIKI_OKURETERU.y = (chara.position.y * 0.9 + JIKI_OKURETERU.y * 0.1);
             /* JIKI_OKURETERU.x=Math.min(1364,Math.max(JIKI_OKURETERU.x));
@@ -260,7 +275,7 @@ window.onload = function () {
             JIKI_OKURETERU.y = (chara.position.y * 0.5 + JIKI_OKURETERU.y * 0.5);
           }
         }
-        if (BOSS_SABHP <= 2) {
+        if (B_SABHP <= 2) {
           if (Syuugou == false && Kakusan == false && rightshot == false && leftshot == false) {
             ctx.beginPath();
             ctx.arc(JIKI_OKURETERU.x + SAB2, JIKI_OKURETERU.y + SAB2, Sabchara, 0, Math.PI * 2, false);
@@ -338,232 +353,232 @@ window.onload = function () {
               if (!charaShot[i].alive) {
                 switch (Count) {
                   case 0:
-                    if (BOSS_SABHP >= 3) charaShot[i].set(chara.position, 4, 0, 3 + charaShot_speed);
+                    if (B_SABHP >= 3) charaShot[i].set(chara.position, 4, 0, 3 + charaShot_speed);
                     break;
                   case 1:
-                    if (Kakusan == false && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == false && B_SABHP >= 3) charaShot[i].set({
                       x: chara.position.x - 30,
                       y: chara.position.y + 10
                     }, Sabchara / 5 * 3, 0, 3 + charaShot_speed);
                     break;
                   case 2:
-                    if (Kakusan == false && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == false && B_SABHP >= 3) charaShot[i].set({
                       x: chara.position.x + 30,
                       y: chara.position.y + 10
                     }, Sabchara / 5 * 3, 0, 3 + charaShot_speed);
                     break;
                   case 3:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 3 + charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 3 + charaShot_speed, 3 + charaShot_speed);
                     break;
                   case 4:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -3 - charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -3 - charaShot_speed, 3 + charaShot_speed);
                     break;
                   case 5:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 5 + charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 5 + charaShot_speed, 3 + charaShot_speed);
                     break;
                   case 6:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -5 - charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -5 - charaShot_speed, 3 + charaShot_speed);
                     break;
                   case 7:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 7 + charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 7 + charaShot_speed, 3 + charaShot_speed);
                     break;
                   case 8:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -7 - charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -7 - charaShot_speed, 3 + charaShot_speed);
                     break;
                   case 9:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 9 + charaShot_speed, 2 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 9 + charaShot_speed, 2 + charaShot_speed);
                     break;
                   case 10:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -9 - charaShot_speed, 2 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -9 - charaShot_speed, 2 + charaShot_speed);
                     break;
                   case 11:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 9 + charaShot_speed, 0);
+                    if (ccs) charaShot[i].set(chara.position, 3, 9 + charaShot_speed, 0);
                     break;
                   case 12:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -9 - charaShot_speed, 0);
+                    if (ccs) charaShot[i].set(chara.position, 3, -9 - charaShot_speed, 0);
                     break;
                   case 13:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 0, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 0, -3 - charaShot_speed);
                     break;
                   case 14:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 1 + charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 1 + charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 15:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -1 - charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -1 - charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 16:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 3 + charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 3 + charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 17:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -3 - charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -3 - charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 18:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 5 + charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 5 + charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 19:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -5 - charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -5 - charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 20:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 7 + charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 7 + charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 21:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -7 - charaShot_speed, -3 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -7 - charaShot_speed, -3 - charaShot_speed);
                     break;
                   case 22:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 9 + charaShot_speed, -2 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 9 + charaShot_speed, -2 - charaShot_speed);
                     break;
                   case 23:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -9 - charaShot_speed, -2 - charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -9 - charaShot_speed, -2 - charaShot_speed);
                     break;
                   case 24:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, 1 + charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, 1 + charaShot_speed, 3 + charaShot_speed);
                     break;
                   case 25:
-                    if (Arecheating) charaShot[i].set(chara.position, 3, -1 - charaShot_speed, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 3, -1 - charaShot_speed, 3 + charaShot_speed);
                     break
                   case 26:
-                    if (Kakusan == false && Syuugou == true && BOSS_SABHP >= 3) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == true && B_SABHP >= 3) charaShot[i].set({
                       x: chara.position.x + 30,
                       y: chara.position.y + 10
                     }, Sabchara / 5 * 3, 0.5 + charaShot_speed / 10, 4 + charaShot_speed);
                     break;
                   case 27:
-                    if (Kakusan == false && Syuugou == true && BOSS_SABHP >= 3) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == true && B_SABHP >= 3) charaShot[i].set({
                       x: chara.position.x - 30,
                       y: chara.position.y + 10
                     }, Sabchara / 5 * 3, -0.5 - charaShot_speed / 10, 4 + charaShot_speed);
                     break;
                   case 28:
-                    if (Kakusan == true && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                    if (Kakusan == true && Syuugou == false && B_SABHP >= 3) charaShot[i].set({
                       x: chara.position.x + 30,
                       y: chara.position.y + 10
                     }, Sabchara / 5 * 3, -1 - charaShot_speed / 10, 3 + charaShot_speed);
                     break;
                   case 29:
-                    if (Kakusan == true && Syuugou == false && BOSS_SABHP >= 3) charaShot[i].set({
+                    if (Kakusan == true && Syuugou == false && B_SABHP >= 3) charaShot[i].set({
                       x: chara.position.x - 30,
                       y: chara.position.y + 10
                     }, Sabchara / 5 * 3, 1 + charaShot_speed / 10, 3 + charaShot_speed);
                     break;
                   case 30:
-                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, 0, 3 + charaShot_speed);
                     break;
                   case 31:
-                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, 0, 3 + charaShot_speed);
                     break;
                   case 32:
-                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2 * 3,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, 0, 3 + charaShot_speed);
                     break;
                   case 33:
-                    if (Kakusan == false && Syuugou == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2 * 3,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, 0, 3 + charaShot_speed);
                     break;
                   case 34:
-                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == true && Syuugou == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2 - 1, 0, -3 - charaShot_speed);
                     break;
                   case 35:
-                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == true && Syuugou == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2 - 1, 0, -3 - charaShot_speed);
                     break;
                   case 36:
-                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == true && Syuugou == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2 * 3,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2 - 1, 0, -3 - charaShot_speed);
                     break;
                   case 37:
-                    if (Kakusan == true && Syuugou == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == true && Syuugou == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2 * 3,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2 - 1, 0, -3 - charaShot_speed);
                     break;
                   case 38:
-                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == false && leftshot == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2 - 1, 3 + charaShot_speed, 0);
                     break;
                   case 39:
-                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == false && leftshot == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, 3 + charaShot_speed, 0);
                     break;
                   case 40:
-                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == false && leftshot == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y + SAB2 * 3
                     }, outcharacter / 2 - 1, 3 + charaShot_speed, 0);
                     break;
                   case 41:
-                    if (rightshot == false && leftshot == true && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == false && leftshot == true && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y - SAB2 * 3
                     }, outcharacter / 2 - 1, 3 + charaShot_speed, 0);
                     break;
                   case 42:
-                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == true && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2 - 1, -3 - charaShot_speed, 0);
                     break;
                   case 43:
-                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == true && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, -3 - charaShot_speed, 0);
                     break;
                   case 44:
-                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == true && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y + SAB2 * 3
                     }, outcharacter / 2 - 1, -3 - charaShot_speed, 0);
                     break;
                   case 45:
-                    if (rightshot == true && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (rightshot == true && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y - SAB2 * 3
                     }, outcharacter / 2 - 1, -3 - charaShot_speed, 0);
                     break;
                   case 46:
-                    if (Arecheating) charaShot[i].set(chara.position, 4, 0, 3 + charaShot_speed);
+                    if (ccs) charaShot[i].set(chara.position, 4, 0, 3 + charaShot_speed);
                     break
                   case 47:
-                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2 - 1, -charaShot_speed, -charaShot_speed);
                     break;
                   case 48:
-                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y + SAB2
                     }, outcharacter / 2, +charaShot_speed, -charaShot_speed, 0);
                     break;
                   case 49:
-                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x + SAB2,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, -charaShot_speed, +charaShot_speed);
                     break;
                   case 50:
-                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && BOSS_SABHP <= 2) charaShot[i].set({
+                    if (Kakusan == false && Syuugou == false && rightshot == false && leftshot == false && B_SABHP <= 2) charaShot[i].set({
                       x: chara.position.x - SAB2,
                       y: chara.position.y - SAB2
                     }, outcharacter / 2 - 1, +charaShot_speed, +charaShot_speed);
@@ -598,14 +613,14 @@ window.onload = function () {
         ctx.fill();
       }
       //雑魚敵
-      if (Score < -Infinity) {
+      if (score < -Infinity) {
         //以下エネミーとのあたり判定 
-        if (!Wascheating && !invincible) {
-          for (j = 0; j < ENEMY_SHOT_MAX_COUNT; j++) {
-            if (!enemyShot[j].alive) continue;
-            if (Math.pow(chara.position.x - enemyShot[j].position.x, 2) +
-              Math.pow(chara.position.y - enemyShot[j].position.y, 2) <=
-              Math.pow(enemyShot[j].size + chara.size, 2)) {
+        if (!c13ting && !invincible) {
+          for (m = 0; m < ENEMY_SHOT_MAX_COUNT; m++) {
+            if (!enemyShot[m].alive) continue;
+            if (Math.pow(chara.position.x - enemyShot[m].position.x, 2) +
+              Math.pow(chara.position.y - enemyShot[m].position.y, 2) <=
+              Math.pow(enemyShot[m].size + chara.size, 2)) {
               life -= 1;
               invincible = true;
               /*chara.position.x = 675;
@@ -614,8 +629,8 @@ window.onload = function () {
             setTimeout(function () {
               invincible = false;
             }, 3000);
-            enemyShot[j].alive = false;
-            Score -= 1000;
+            enemyShot[m].alive = false;
+            score -= 1000;
           }
         } // enemyShot と　chara の当り判定
         for (j = 0; j < ENEMY_MAX_COUNT; j++) {
@@ -631,216 +646,248 @@ window.onload = function () {
               invincible = false;
             }, 3000);
             enemy[j].alive = false;
-            Score -= 1000;
+            score -= 1000;
           }
         } // enemy と　chara の当り判定
-
-        for (i = 0; i < ENEMY_MAX_COUNT; i++) {
-          if (!enemy[i].alive) continue;
+        for (j = 0; j < ENEMY_MAX_COUNT; j++) {
+          if (!enemy[j].alive) continue;
           for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
             if (!charaShot[j].alive) continue;
-            if (Math.pow(enemy[i].position.x - charaShot[j].position.x, 2) +
-              Math.pow(enemy[i].position.y - charaShot[j].position.y, 2) <=
-              Math.pow(charaShot[j].size + enemy[i].size, 2)) {
-              enemy[i].alive = false;
+            if (Math.pow(enemyShot[m].position.x - charaShot[j].position.x, 2) +
+              Math.pow(enemyShot[m].position.y - charaShot[j].position.y, 2) <=
+              Math.pow(charaShot[j].size + enemyShot[m].size, 2)) {
+              enemyShot[i].alive = false;
               charaShot[j].alive = false;
-              Score += 50;
+              score += 50;
             }
           }
-        } //以上 
-
+        } //enemyShot と charashot
+        //以上
+        for (j = 0; j < ENEMY_MAX_COUNT; j++) {
+          if (!enemy[j].alive) continue;
+          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
+            if (!charaShot[j].alive) continue;
+            if (Math.pow(enemy[j].position.x - charaShot[j].position.x, 2) +
+              Math.pow(enemy[j].position.y - charaShot[j].position.y, 2) <=
+              Math.pow(charaShot[j].size + enemy[i].size, 2)) {
+              enemy[j].alive = false;
+              charaShot[j].alive = false;
+              score += 50;
+            }
+          }
+        } //enemyshot と charashot 
         counter++;
         if (counter % 40 === 0) {
-          for (i = 0; i < ENEMY_MAX_COUNT; i++) {
-            if (!enemy[i].alive) {
+          for (j = 0; j < ENEMY_MAX_COUNT; j++) {
+            if (!enemy[j].alive) {
               j = (counter % 80) / 40;
               var enemySize = 15;
               p.x = -enemySize + (screenCanvas.width + enemySize * 4) * j
               p.y = screenCanvas.height / 4;
               if (j == 1) p.y = 100;
-              enemy[i].set(p, enemySize, j << 0);
+              enemy[j].set(p, enemySize, j << 0);
               break;
             }
           }
         } // enemy を新しく追加
 
-        {
-          ctx.fillStyle = ENEMY_COLOR;
-          ctx.beginPath();
-          for (i = 0; i < ENEMY_MAX_COUNT; i++) {
-            if (enemy[i].alive) {
-              enemy[i].move();
-              ctx.arc(
-                enemy[i].position.x,
-                enemy[i].position.y,
-                enemy[i].size,
-                0, Math.PI * 2, false
-              );
-              enemy[i].param++;
-              if (enemy[i].param % 100 === 0) {
-                for (j = 0; j < ENEMY_SHOT_MAX_COUNT; j++) {
-                  if (!enemyShot[j].alive) {
-                    if (enemy[i].type == 0) {
-                      p = enemy[i].position.distance(chara.position);
-                      p.normalize();
-                      enemyShot[j].set(enemy[i].position, p, 5, 3);
-                    } else {
-                      enemyShot[j].set(enemy[i].position, {
-                        x: 0,
-                        y: 1.5
-                      }, 5, 3);
-                    }
-                    break;　
-                  }
-                }
-              }
-              ctx.closePath();
-            }
-          }
-          ctx.fill();
-        }
-
-        {
-          ctx.fillStyle = ENEMY_SHOT_COLOR;
-          ctx.beginPath();
-          for (i = 0; i < ENEMY_MAX_COUNT; i++) {
-            if (!enemyShot[i].alive) continue;
-            enemyShot[i].move();
+        ctx.fillStyle = ENEMY_COLOR;
+        ctx.beginPath();
+        for (j = 0; j < ENEMY_MAX_COUNT; j++) {
+          if (enemy[j].alive) {
+            enemy[j].move();
             ctx.arc(
-              enemyShot[i].position.x,
-              enemyShot[i].position.y,
-              enemyShot[i].size,
+              enemy[j].position.x,
+              enemy[j].position.y,
+              enemy[j].size,
               0, Math.PI * 2, false
             );
+            enemy[j].param++;
+            if (enemy[j].param % 100 === 0) {
+              for (m = 0; m < ENEMY_SHOT_MAX_COUNT; m++) {
+                if (!enemyShot[m].alive) {
+                  if (enemy[j].type == 0) {
+                    p = enemy[m].position.distance(chara.position);
+                    p.normalize();
+                    enemyShot[m].set(enemy[j].position, p, 5, 3);
+                  } else {
+                    enemyShot[m].set(enemy[j].position, {
+                      x: 0,
+                      y: 1.5
+                    }, 5, 3);
+                  }
+                  break;
+                }
+              }
+            }
             ctx.closePath();
           }
-          ctx.fill();
-        } // 敵のたまの移動、表示
+        }
+        ctx.fill();
 
-      } else if (Score > -Infinity) {
-        if (!Wascheating && !invincible) {
-          for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-            if (!bossShot[j].alive) continue;
-            if (Math.pow(chara.position.x - bossShot[j].position.x, 2) +
-              Math.pow(chara.position.y - bossShot[j].position.y, 2) <=
-              Math.pow(bossShot[j].size + chara.size, 2)) {
+        ctx.fillStyle = ENEMY_SHOT_COLOR;
+        ctx.beginPath();
+        for (j = 0; j < ENEMY_MAX_COUNT; j++) {
+          if (!enemyShot[m].alive) continue;
+          enemyShot[m].move();
+          ctx.arc(
+            enemyShot[m].position.x,
+            enemyShot[m].position.y,
+            enemyShot[m].size,
+            0, Math.PI * 2, false
+          );
+          ctx.closePath();
+        }
+        ctx.fill();
+        // 敵のたまの移動、表示
+      } else if (score > -Infinity) {
+        for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+          if (!bossShot[l].alive) continue;
+          if (Math.pow(chara.position.x - bossShot[l].position.x, 2) +
+            Math.pow(chara.position.y - bossShot[l].position.y, 2) <=
+            Math.pow(bossShot[l].size + chara.size, 2)) {
+            if (!c13ting && !invincible) {
               life -= 1;
               invincible = true;
               setTimeout(function () {
                 invincible = false;
               }, 3000);
-              bossShot[j].alive = false;
-              Score -= 1000;
+              score -= 1000;
             }
+            bossShot[l].alive = false;
           }
-          for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
-            if (!bossShot2[k].alive) continue;
-            if (Math.pow(chara.position.x - bossShot2[k].position.x, 2) +
-              Math.pow(chara.position.y - bossShot2[k].position.y, 2) <=
-              Math.pow(bossShot2[k].size + chara.size, 2)) {
+        }
+        for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+          if (!bossShot2[k].alive) continue;
+          if (Math.pow(chara.position.x - bossShot2[k].position.x, 2) +
+            Math.pow(chara.position.y - bossShot2[k].position.y, 2) <=
+            Math.pow(bossShot2[k].size + chara.size, 2)) {
+            if (!c13ting && !invincible) {
               life -= 1;
               invincible = true;
               setTimeout(function () {
                 invincible = false;
               }, 3000);
-              bossShot2[k].alive = false;
-              Score -= 1000;
+              score -= 1000;
             }
+            bossShot2[k].alive = false;
           }
-          for (j = 0; j < BOSS_MAX_COUNT; j++) {
-            if (!boss[j].alive) continue;
-            if (Math.pow(chara.position.x - boss[j].position.x, 2) +
-              Math.pow(chara.position.y - boss[j].position.y, 2) <=
-              Math.pow(boss[j].size + chara.size, 2)) {
+        }
+        for (h = 0; h < BOSS_SHOT2_MAX_COUNT; h++) {
+          if (!bossShot2[h].alive) continue;
+          if (Math.pow(chara.position.x - bossShot2[h].position.x, 2) +
+            Math.pow(chara.position.y - bossShot2[h].position.y, 2) <=
+            Math.pow(bossShot2[h].size + chara.size, 2)) {
+            if (!c13ting && !invincible) {
               life -= 1;
               invincible = true;
-              /* chara.position.x = 675;
-               chara.position.y = 500;*/
               setTimeout(function () {
                 invincible = false;
               }, 3000);
-              BOSS_HP -= 10;
-              Score += 1000;
+              score -= 1000;
+            }
+            bossShot2[h].alive = false;
+          }
+        }
+        for (b = 0; b < BOSS_MAX_COUNT; b++) {
+          if (!boss[b].alive) continue;
+          if (Math.pow(chara.position.x - boss[b].position.x, 2) +
+            Math.pow(chara.position.y - boss[b].position.y, 2) <=
+            Math.pow(boss[b].size + chara.size, 2)) {
+            if (!c13ting && !invincible) {
+              life -= 1;
+              invincible = true;
+              setTimeout(function () {
+                invincible = false;
+              }, 3000);
+              B_HP -= 10;
+              score += 1000;
             }
           }
         }
-        for (i = 0; i < BOSS_MAX_COUNT; i++) {
-          if (!boss[i].alive) continue;
-          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
-            if (!charaShot[j].alive) continue;
-            if (Math.pow(boss[i].position.x - charaShot[j].position.x, 2) +
-              Math.pow(boss[i].position.y - charaShot[j].position.y, 2) <=
-              Math.pow(charaShot[j].size + boss[i].size, 2)) {
-              BOSS_HP -= 1;
-              charaShot[j].alive = false;
+        for (b = 0; b < BOSS_MAX_COUNT; b++) {
+          if (!boss[b].alive) continue;
+          for (i = 0; i < CHARA_SHOT_MAX_COUNT; i++) {
+            if (!charaShot[i].alive) continue;
+            if (Math.pow(boss[b].position.x - charaShot[i].position.x, 2) +
+              Math.pow(boss[b].position.y - charaShot[i].position.y, 2) <=
+              Math.pow(charaShot[i].size + boss[b].size, 2)) {
+              B_HP -= 1;
+              charaShot[i].alive = false;
             }
           }
         }
+        /*
+                for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+                  if (!bossShot[l].alive) continue;
+                  for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
+                    if (!charaShot[j].alive) continue;
+                    if (Math.pow(bossShot[l].position.x - charaShot[j].position.x, 2) +
+                      Math.pow(bossShot[l].position.y - charaShot[j].position.y, 2) <=
+                      Math.pow(charaShot[j].size + bossShot[l].size, 2)) {
+                      charaShot[j].alive = false;
+                      bossShot[l].alive = false;
+                    }
+                  }
+                }
+                for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+                  if (!bossShot2[k].alive) continue;
+                  for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
+                    if (!charaShot[j].alive) continue;
+                    if (Math.pow(bossShot2[k].position.x - charaShot[j].position.x, 2) +
+                      Math.pow(bossShot2[k].position.y - charaShot[j].position.y, 2) <=
+                      Math.pow(charaShot[j].size + bossShot2[k].size, 2)) {
+                      charaShot[j].alive = false;
+                      bossShot2[k].alive = false;
+                    }
+                  }
+                }*/
         counter++;
-        if (BOSS_SABHP >= 3) {
+        if (B_SABHP >= 3) {
           if (counter % 10 === 0) {
-            for (i = 0; i < BOSS_MAX_COUNT; i++) {
-              if (!boss[i].alive) {
+            for (b = 0; b < BOSS_MAX_COUNT; b++) {
+              if (!boss[b].alive) {
                 j = (counter % 30) / 10;
                 var bossSize = 20;
-                p.x = (screenCanvas.width - bossSize) / 2;
+                p.x = screenCanvas.width / 2; //Bossの初期位置
                 p.y = screenCanvas.height / 4;
                 if (j == 0 && boss.some((v) => v.type == 0 && v.alive)) break;
                 if ((j == 1 || j == 2) && ((counter % 60 != 0) || Math.random() > 1)) break;
-                boss[i].set(p, bossSize, j << 0);
+                boss[b].set(p, bossSize, j << 0);
                 break;
               }
             }
           }
         }
-        if (BOSS_SABHP <= 2) {
+        if (B_SABHP <= 2) {
           if (counter % 10 === 0) {
-            for (i = 0; i < BOSS_MAX_COUNT; i++) {
-              if (!boss[i].alive) {
+            for (b = 0; b < BOSS_MAX_COUNT; b++) {
+              if (!boss[b].alive) {
                 j = (counter % 30) / 10;
                 var bossSize = 20;
                 if (j == 0 && boss.some((v) => v.type == 0 && v.alive)) break;
                 if ((j == 1 || j == 2) && ((counter % 60 != 0) || Math.random() > 1)) break;
-                boss[i].set(p, bossSize, j << 0);
+                boss[b].set(p, bossSize, j << 0);
                 break;
               }
             }
           }
         }
-        // BOSSの挙動----------------------------------------------
-        if (BOSS_SABHP == 4) {
-          //Bossshot-----------------------------
-          ctx.fillStyle = BOSS_SHOT_COLOR;
-          ctx.beginPath();
-          for (i = 0; i < BOSS_SHOT_MAX_COUNT; i++) {
-            if (bossShot[i].alive) // continue;
-            {
-              bossShot[i].move();
-              //console.log("bossShot 描画");
-              ctx.arc(
-                bossShot[i].position.x,
-                bossShot[i].position.y,
-                bossShot[i].size,
-                0, Math.PI * 2, false
-              );
-              ctx.closePath();
-            }
-          }
-          //Boss本体-------------------------------------------F
-          ctx.fill();
-          ctx.fillStyle = BOSS_COLOR;
-          ctx.beginPath();
-          for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            if (boss[i].alive) {
-              ctx.arc(
-                boss[i].position.x,
-                boss[i].position.y,
-                boss[i].size,
-                0, Math.PI * 2, false
-              );
-              /*boss[i].param++;*/
-              if ( /*SHOT_*/ bosscounter % 30 == 0) {
-                a = boss[i].position.distance(chara.position);
+        // BOSSの挙動----------------------------------------------------------------------------------------------
+        B_shotc += 1 * Math.PI / 180;
+        // console.log(B_shotc);
+        if (B_SABHP == 4) {
+          //Bossshot----------------------------------
+          bosscounter++;
+          if ( /*SHOT_*/ bosscounter % 30 == 0) {
+            for (b = 0; b < BOSS_MAX_COUNT; b++) {
+              if (boss[b].alive) // continue;
+              { /*boss[b].param++;*/
+                //座標計算-----------------------------------
+                B_shotpx = boss[b].size * 3.5 * Math.cos(B_shotc) + boss[b].position.x;
+                B_shotpy = boss[b].size * 3.5 * Math.sin(B_shotc) + boss[b].position.y;
+                ///方向-------------------------------------
+                a = boss[b].position.distance(chara.position);
                 a.normalize();
                 let Vectors = [{
                   x: 1.5, //右
@@ -871,255 +918,415 @@ window.onload = function () {
                 }, {
                   x: -1.08, //左上
                   y: -1.08
-                }, {
-                  x: a.x,
-                  y: a.y,
-                  size: 5,
-                  speed: 1.25
                 }];
                 let vectorCounter = 0;
-                for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-                  if (!bossShot[j].alive) {
-                    if (boss[i].type == 0) {
-                      bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+                  if (!bossShot[l].alive) {
+                    if (boss[b].type == 0) {
+                      bossShot[l].set({
+                        x: B_shotpx,
+                        y: B_shotpy
+                      }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　
+                  }
+                }
+                vectorCounter = 0;
+                for (h = 0; h < BOSS_SHOT_MAX_COUNT; h++) {
+                  if (!bossShot3[h].alive) {
+                    if (boss[b].type == 0) {
+                      bossShot3[h].set({
+                        x: ((B_shotpx - boss[b].position.x) * -1) + boss[b].position.x,
+                        y: ((B_shotpy - boss[b].position.y) * -1) + boss[b].position.y
+                      }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                      vectorCounter++;
+                      if (vectorCounter >= Vectors.length) break;
+                    }
+                  }
+                }
+                //console.log(bossShot);
+                //console.log("a");
+                if (bosscounter % 15 == 0 && bosscounter % 150 != 0) {
+                  a = boss[b].position.distance(chara.position);
+                  a.normalize();
+                  let Vectors = [{
+                    x: a.x,
+                    y: a.y,
+                    size: 7,
+                    speed: 2
+                  }];
+                  let vectorCounter = 0;
+                  for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+                    if (!bossShot2[k].alive) {
+                      if (boss[b].type == 0) {
+                        bossShot2[k].set(boss[b].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                        vectorCounter++;
+                        // console.log(vectorCounter,bossShot[k]);
+                        if (vectorCounter >= Vectors.length) break;
+                      }
+                    }
+                  }
+                  //console.log("a");
                 }
               }
-              /*SHOT_*/
-              bosscounter++;
-              ctx.closePath();
             }
-            ctx.fill();
           }
-        }; //Boss4
-
-        if (BOSS_SABHP == 3) {
-          //bossshot-------------------------------------------
           ctx.fillStyle = BOSS_SHOT_COLOR;
           ctx.beginPath();
-          for (i = 0; i < BOSS_SHOT_MAX_COUNT; i++) {
-            if (bossShot[i].alive) {
-              bossShot[i].move();
+          for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+            if (bossShot[l].alive) {
+              bossShot[l].move();
               ctx.arc(
-                bossShot[i].position.x,
-                bossShot[i].position.y,
-                bossShot[i].size,
+                bossShot[l].position.x,
+                bossShot[l].position.y,
+                bossShot[l].size,
                 0, Math.PI * 2, false
               );
               ctx.closePath();
             }
           }
           ctx.fill();
-          //bossmain----------------------------------
-          ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
-          for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            if (boss[i].alive) {
-              /*boss[i].move();*/
+          for (h = 0; h < BOSS_SHOT_MAX_COUNT; h++) {
+            if (bossShot3[h].alive) {
+              bossShot3[h].move();
               ctx.arc(
-                boss[i].position.x,
-                boss[i].position.y,
-                boss[i].size,
+                bossShot3[h].position.x,
+                bossShot3[h].position.y,
+                bossShot3[h].size,
                 0, Math.PI * 2, false
               );
-              /*boss[i].param++;*/
-              if (bosscounter % 30 == 0) {
-                a = boss[i].position.distance(chara.position);
-                a.normalize();
-                let Vectors = [{
-                  x: a.x,
-                  y: a.y,
-                  size: 5,
-                  speed: 1.25
-                }];
-
-                let vectorCounter = 0;
-                for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-                  if (!bossShot[j].alive) {
-                    if (boss[i].type == 0) {
-                      bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
-                      vectorCounter++;
-                      if (vectorCounter >= Vectors.length) break;
-                    }
-                  }　
-                }
-              }
-              if (bosscounter % 60 == 0) {
-                /*a = boss[i].position.distance(chara.position);
-                a.normalize();*/
-                let Vectors = [{}, {}];
-
-                let vectorCounter = 0;
-                for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-                  if (!bossShot[j].alive) {
-                    if (boss[i].type == 0) {
-                      if (bosscounter % 120 == 0) {
-                        bossShot[j].set({
-                          x: screenCanvas.width / 6,
-                          y: boss[i].position.y
-                        }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
-                      }
-                      vectorCounter++;
-                      if (vectorCounter >= Vectors.length) break;
-                    }
-                  }　
-                }
-              }
-              bosscounter++;
               ctx.closePath();
             }
-            ctx.fill();
-          } {
-            //bossSAB-------------------------------------------------------------
-            if (bossSAB[0].position.x <= screenCanvas.width / 2) {
-              bossSABa = true;
-              bossSABb = true;
-            };
-            /*if (bossSAB[1].position.x >= screenCanvas.width / 2) {
-              bossSABb = true;
-            };*/
-            if (bossSABa == true && bossSABb == true) {
-              setTimeout(function () {
-                bossSABc = true;
-              }, 5000);
-            };
-            if (!bossSABc) {
-              bossSABcounter++;
-              if (bossSABcounter % 50 === 0) {
-                for (i = 0; i < BOSSSAB_MAX_COUNT; i++) {
-                  if (!bossSAB[i].alive) {
-                    j = (bossSABcounter % 80) / 40;
-                    var bossSABSize = 15;
-                    p.x = screenCanvas.width / 2,
-                      p.y = screenCanvas.height / 4,
-                      bossSAB[i].set(p, bossSABSize, j << 0);
-                    break;
-                  }
-                }
-              }
-            };
-            ctx.fillStyle = BOSSSAB_COLOR;
-            ctx.beginPath();
-            for (i = 0; i < BOSSSAB_MAX_COUNT; i++) {
-              if (bossSAB[i].alive) {
-                bossSAB[i].move();
-                ctx.arc(
-                  bossSAB[i].position.x,
-                  bossSAB[i].position.y,
-                  bossSAB[i].size,
-                  0, Math.PI * 2, false
-                );
-                ctx.closePath();
-              }
-            }
-            ctx.fill();
           }
-        }; //Boss3
-
-
-        if (BOSS_SABHP == 2) {
-          //Bossshot----------------------------------
+          ctx.fill();
+          ctx.fillStyle = BOSS_SHOT2_COLOR;
+          ctx.beginPath();
+          for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+            if (bossShot2[k].alive) {
+              bossShot2[k].move();
+              ctx.arc(
+                bossShot2[k].position.x,
+                bossShot2[k].position.y,
+                bossShot2[k].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          //Bossmain------------------------------------------- 
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.beginPath();
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) {
+              ctx.arc(
+                boss[b].position.x,
+                boss[b].position.y,
+                boss[b].size,
+                0, Math.PI * 2, false
+              );
+              ctx.arc(
+                ((B_shotpx - boss[b].position.x) * -1) + boss[b].position.x,
+                ((B_shotpy - boss[b].position.y) * -1) + boss[b].position.y,
+                boss[b].size / 3,
+                0, Math.PI * 2, false
+              );
+              ctx.moveTo(B_shotpx,
+                B_shotpy);
+              ctx.arc(
+                B_shotpx,
+                B_shotpy,
+                boss[b].size / 3,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          ctx.fillStyle = BOSS_COLOR;
+          ctx.beginPath();
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) {
+              ctx.arc(
+                boss[b].position.x,
+                boss[b].position.y,
+                boss[b].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+        }; //Boss4
+        if (B_SABHP == 3) {
+          //System---------------------------------------        
+          if (B_saba >= screenCanvas.width / 7) { B_saba -= 1.5; }
+          if (B_sabb <= screenCanvas.width / 7 * 6) { B_sabb += 1.5; }
+          //Bossenemy-------------------------------------------
           bosscounter++;
-          for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            if (boss[i].alive) // continue;
-            { /*boss[i].param++;*/
-              if ( /*SHOT_*/ bosscounter % 50 == 0) {
-                /*a = boss[i].position.distance(chara.position);
-                a.normalize();*/
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) {
+              if (bosscounter % 50 == 0) {
                 let Vectors = [{
-                  x: 1,
-                  y: 0
-                }, {
-                  x: -1,
-                  y: 0
-                }, {
                   x: 0,
-                  y: 1
-                }, {
-                  x: 0,
-                  y: -1
-                }, {
-                  x: 1,
-                  y: 0.5
-                }, {
-                  x: 0.5,
-                  y: 1
-                }, {
-                  x: 1,
-                  y: -0.5
-                }, {
-                  x: 0.5,
-                  y: -1
-                }, {
-                  x: -1,
-                  y: 0.5
-                }, {
-                  x: -0.5,
-                  y: 1
-                }, {
-                  x: -1,
-                  y: -0.5
-                }, {
-                  x: -0.5,
-                  y: -1
+                  y: 1,
+                  size: boss[b].size / 3 * 2
                 }];
-
                 let vectorCounter = 0;
-                for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-                  if (!bossShot[j].alive) {
-                    if (boss[i].type == 0) {
-                      bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+                  if (!bossShot[l].alive) {
+                    if (boss[b].type == 0) {
+                      bossShot[l].set({ x: B_saba, y: boss[b].position.y }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
-                      // console.log(vectorCounter,bossShot[j]);
+                      // console.log(vectorCounter,bossShot[l]);
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　
+                  }
                 }
                 //console.log("a");
-              }
-              if ( /*SHOT_*/ bosscounter % 100 == 0) {
-                a = boss[i].position.distance(chara.position);
-                a.normalize();
-                let Vectors = [{
-                  x: 1,
-                  y: 1,
-                  size: 8,
-                  speed: 4
-                }, {
-                  x: 1,
-                  y: -1,
-                  size: 8,
-                  speed: 4
-                }, {
-                  x: -1,
-                  y: 1,
-                  size: 8,
-                  speed: 4
-                }, {
-                  x: -1,
-                  y: -1,
-                  size: 8,
-                  speed: 4
-                }, {
-                  x: a.x,
-                  y: a.y,
-                  size: 8,
-                  speed: 4
-                }];
-
-                let vectorCounter = 0;
+                vectorCounter = 0;
                 for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
                   if (!bossShot2[k].alive) {
-                    if (boss[i].type == 0) {
-                      bossShot2[k].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                    if (boss[b].type == 0) {
+                      bossShot2[k].set({ x: B_sabb, y: boss[b].position.y }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       // console.log(vectorCounter,bossShot[k]);
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　
+                  }
+                }
+              }
+            }
+          }
+          ctx.fillStyle = 'rgba(255,183,76,0.9)';
+          ctx.beginPath();
+          for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+            if (bossShot[l].alive) {
+              bossShot[l].move();
+              ctx.arc(
+                bossShot[l].position.x,
+                bossShot[l].position.y,
+                bossShot[l].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          ctx.beginPath();
+          for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+            if (bossShot2[k].alive) {
+              bossShot2[k].move();
+              ctx.arc(
+                bossShot2[k].position.x,
+                bossShot2[k].position.y,
+                bossShot2[k].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          //Bossshot----------------------------------
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) {
+              if (bosscounter % 80 == 0) {
+                let Vectors = [{
+                  x: 1,
+                  y: 0,
+                  size: boss[b].size / 2
+                }, {
+                  x: -1,
+                  y: 0,
+                  size: boss[b].size / 2
+                }];
+                let vectorCounter = 0;
+                for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+                  for (h = 0; h < BOSS_SHOT_MAX_COUNT; h++) {
+                    if (!bossShot3[h].alive) {
+                      if (boss[b].type == 0) {
+                        bossShot3[h].set(bossShot[l].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                        vectorCounter++;
+                        // console.log(vectorCounter,bossShot[l]);
+                        if (vectorCounter >= Vectors.length) break;
+                      }
+                    }
+                  }
+                }
+                //console.log("a");
+                vectorCounter = 0;
+                for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+                  for (u = 0; u < BOSS_SHOT2_MAX_COUNT; u++) {
+                    if (!bossShot4[u].alive) {
+                      if (boss[b].type == 0) {
+                        bossShot4[u].set({ x: B_sabb, y: boss[b].position.y }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                        vectorCounter++;
+                        // console.log(vectorCounter,bossShot[k]);
+                        if (vectorCounter >= Vectors.length) break;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          ctx.fillStyle = BOSS_SHOT_COLOR;
+          ctx.beginPath();
+          for (h = 0; h < BOSS_SHOT_MAX_COUNT; h++) {
+            if (bossShot3[h].alive) {
+              bossShot3[h].move();
+              ctx.arc(
+                bossShot3[h].position.x,
+                bossShot3[h].position.y,
+                bossShot3[h].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          ctx.beginPath();
+          for (u = 0; u < BOSS_SHOT2_MAX_COUNT; u++) {
+            if (bossShot4[u].alive) {
+              bossShot4[u].move();
+              ctx.arc(
+                bossShot4[u].position.x,
+                bossShot4[u].position.y,
+                bossShot4[u].size,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          //Bossmain-------------------------------------------
+          ctx.fillStyle = BOSS_COLOR;
+          ctx.beginPath();
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) {
+              ctx.arc(
+                boss[b].position.x,
+                boss[b].position.y,
+                boss[b].size,
+                0, Math.PI * 2, false
+              );
+              ctx.arc(
+                B_saba,
+                boss[b].position.y,
+                boss[b].size / 4 * 3,
+                0, Math.PI * 2, false
+              );
+              ctx.arc(
+                B_sabb,
+                boss[b].position.y,
+                boss[b].size / 4 * 3,
+                0, Math.PI * 2, false
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+        }; //Boss3
+        if (B_SABHP == 2) {
+          //Bossshot----------------------------------
+          bosscounter++;
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) // continue;
+            { /*boss[b].param++;*/
+              if ( /*SHOT_*/ bosscounter % 50 == 0) {
+                /*a = boss[b].position.distance(chara.position);
+                a.normalize();*/
+                let Vectors = [{
+                  x: 1,
+                  y: 0
+                }, {
+                  x: -1,
+                  y: 0
+                }, {
+                  x: 0,
+                  y: 1
+                }, {
+                  x: 0,
+                  y: -1
+                }, {
+                  x: 1,
+                  y: 0.5
+                }, {
+                  x: 0.5,
+                  y: 1
+                }, {
+                  x: 1,
+                  y: -0.5
+                }, {
+                  x: 0.5,
+                  y: -1
+                }, {
+                  x: -1,
+                  y: 0.5
+                }, {
+                  x: -0.5,
+                  y: 1
+                }, {
+                  x: -1,
+                  y: -0.5
+                }, {
+                  x: -0.5,
+                  y: -1
+                }];
+                let vectorCounter = 0;
+                for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+                  if (!bossShot[l].alive) {
+                    if (boss[b].type == 0) {
+                      bossShot[l].set(boss[b].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                      vectorCounter++;
+                      // console.log(vectorCounter,bossShot[l]);
+                      if (vectorCounter >= Vectors.length) break;
+                    }
+                  }
+                }
+                //console.log("a");
+              }
+              if ( /*SHOT_*/ bosscounter % 100 == 0) {
+                a = boss[b].position.distance(chara.position);
+                a.normalize();
+                let Vectors = [{
+                  x: 1,
+                  y: 1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: 1,
+                  y: -1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: -1,
+                  y: 1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: -1,
+                  y: -1,
+                  size: 8,
+                  speed: 4
+                }, {
+                  x: a.x,
+                  y: a.y,
+                  size: 8,
+                  speed: 4
+                }];
+                let vectorCounter = 0;
+                for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
+                  if (!bossShot2[k].alive) {
+                    if (boss[b].type == 0) {
+                      bossShot2[k].set(boss[b].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                      vectorCounter++;
+                      // console.log(vectorCounter,bossShot[k]);
+                      if (vectorCounter >= Vectors.length) break;
+                    }
+                  }
                 }
                 //console.log("a");
               }
@@ -1127,20 +1334,19 @@ window.onload = function () {
           }
           ctx.fillStyle = BOSS_SHOT_COLOR;
           ctx.beginPath();
-          for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-            if (bossShot[j].alive) {
-              bossShot[j].move();
+          for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+            if (bossShot[l].alive) {
+              bossShot[l].move();
               ctx.arc(
-                bossShot[j].position.x,
-                bossShot[j].position.y,
-                bossShot[j].size,
+                bossShot[l].position.x,
+                bossShot[l].position.y,
+                bossShot[l].size,
                 0, Math.PI * 2, false
               );
               ctx.closePath();
             }
           }
           ctx.fill();
-
           ctx.fillStyle = BOSS_SHOT2_COLOR;
           ctx.beginPath();
           for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
@@ -1159,37 +1365,52 @@ window.onload = function () {
           //Bossmain-------------------------------------------
           ctx.fillStyle = BOSS_COLOR;
           ctx.beginPath();
-          for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            if (boss[i].alive) {
-              boss[i].move();
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) {
+              boss[b].move();
               ctx.arc(
-                boss[i].position.x,
-                boss[i].position.y,
-                boss[i].size,
+                boss[b].position.x,
+                boss[b].position.y,
+                boss[b].size,
                 0, Math.PI * 2, false
               );
               ctx.closePath();
             }
           }
           ctx.fill();
-
         }; //Boss2
-
-        if (BOSS_SABHP == 1) {
-          ctx.fillStyle = BOSS_COLOR;
+        if (B_SABHP == 1) {
+          //bossshot--------------------------
+          ctx.fillStyle = BOSS_SHOT_COLOR;
           ctx.beginPath();
-          for (i = 0; i < BOSS_MAX_COUNT; i++) {
-            if (boss[i].alive) {
-              /* boss[i].move();*/
+          for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+            if (bossShot[l].alive) {
+              bossShot[l].move();
               ctx.arc(
-                boss[i].position.x,
-                boss[i].position.y,
-                boss[i].size,
+                bossShot[l].position.x,
+                bossShot[l].position.y,
+                bossShot[l].size,
                 0, Math.PI * 2, false
               );
-              /*boss[i].param++;*/
+              ctx.closePath();
+            }
+          }
+          ctx.fill();
+          //bossmain------------------------------
+          ctx.fillStyle = BOSS_COLOR;
+          ctx.beginPath();
+          for (b = 0; b < BOSS_MAX_COUNT; b++) {
+            if (boss[b].alive) {
+              boss[b].move();
+              ctx.arc(
+                boss[b].position.x,
+                boss[b].position.y,
+                boss[b].size,
+                0, Math.PI * 2, false
+              );
+              /*boss[b].param++;*/
               if ( /*SHOT_*/ bosscounter % 30 == 0) {
-                a = boss[i].position.distance(chara.position);
+                a = boss[b].position.distance(chara.position);
                 a.normalize();
                 let Vectors = [{
                   x: a.x,
@@ -1197,16 +1418,15 @@ window.onload = function () {
                   size: 5,
                   speed: 1.25
                 }];
-
                 let vectorCounter = 0;
-                for (j = 0; j < BOSS_SHOT_MAX_COUNT; j++) {
-                  if (!bossShot[j].alive) {
-                    if (boss[i].type == 0) {
-                      bossShot[j].set(boss[i].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
+                  if (!bossShot[l].alive) {
+                    if (boss[b].type == 0) {
+                      bossShot[l].set(boss[b].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       if (vectorCounter >= Vectors.length) break;
                     }
-                  }　
+                  }
                 }
               }
               bosscounter++;
@@ -1215,87 +1435,112 @@ window.onload = function () {
             ctx.fill();
           }
         }; //Boss1
-
       }
     }
-    info.innerText = "Score : " + Score + " || " + "Life : " + life + "\\" + BOSS_SABHP;
-    info_2.innerText = "Boss : " + BOSS_COUNTER + " || " + "BOSS_HP : " + BOSS_HP;
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.beginPath();
+    ctx.font = "40px 'Rounded Mplus 1c', 'Open Sans', 'Noto Sans Japanese', 'Yu Gothic', 'Meiryo UI', sans-serif";
+    ctx.fillText("Life / " + life, 0, screenCanvas.height - 35 - 40);
+    ctx.fillText("Score / " + score, 0, screenCanvas.height - 35);
+    ctx.closePath();
+    // info.innerText = "score : " + score + " || " + "Life : " + life + "\\" + B_SABHP;
+    //info_2.innerText = "boss : " + B_COUNT + " || " + "B_HP : " + B_HP;
     //COLOR--------------------
-    var B_par = BOSS_HP / 400;
+    var B_par = B_HP / 400;
     var B_parc = B_par * 255;
+    var C_par = life / 5;
+    var C_parc = C_par * 255;
     //HPBer--------------------------------------------------------------------------------------- 
     //ctx.strokeStyle = BOSS_COLOR;    
-    if (BOSS_SABHP >= 3) {
+    if (B_SABHP >= 3) {
       ctx.fillStyle = 'rgba(0,0,' + (B_parc) + ',0.5)';
     } //'rgba(' + (B_parc) + ',' + (B_parc) + ',' + (B_parc) + ',1)';
     else {
       ctx.fillStyle = 'rgba(' + (B_parc) + ',' + (B_parc) + ',0,0.5)';
     }
     ctx.beginPath();
-    ctx.fillRect(0, 0, B_par * screenCanvas.width, 25);
+    ctx.fillRect(0, 0, B_par * screenCanvas.width, 30);
     ctx.stroke();
     ctx.closePath();
-
-    if (BOSS_SABHP == 4) {
-      if (BOSS_HP <= 200) {
-        BOSS_SABHP = 3;
-        Score += 100
+    ctx.fillStyle = CHARA_COLOR;
+    ctx.beginPath();
+    ctx.fillRect(0, screenCanvas.height - 20, C_par * screenCanvas.width, 20);
+    ctx.stroke();
+    ctx.closePath();
+    if (B_SABHP == 4) {
+      if (B_HP <= 200) {
+        B_SABHP = 3;
+        score += 100
       }
     }
-    if (BOSS_SABHP == 3) {
-      if (BOSS_HP <= 0) {
-        BOSS_SABHP = 2;
-        Score += 150;
+    if (B_SABHP == 3) {
+      if (B_chenge && B_HP >= 0) {
+        B_sab();
+      }
+      if (B_HP <= 0) {
+        B_SABHP = 2;
+        score += 150;
         BOSS_MAX_COUNT = 1;
-        BOSS_HP = 400;
+        B_HP = 400;
         boss[0].alive = false;
         ChangeColor();
+        B_chenge = true;
       }
     }
-    if (BOSS_SABHP == 2) {
+    if (B_SABHP == 2) {
       JIKIshotpar = 15;
-      BOSS_COUNTER = "式神";
-      BOSS_HP = 400;
-      if (BOSS_HP <= 200) {
-        BOSS_SABHP = 1;
-        Score += 200
+      B_COUNT = "式神";
+      if (B_chenge) {
+        B_HP = 400;
+      }
+      setTimeout(function () {
+        B_chenge = false
+      }, 100);
+      if (B_HP <= 200) {
+        B_SABHP = 1;
+        score += 200
       }
     }
-    if (BOSS_SABHP == 1) {
-      if (BOSS_HP <= 0) {
-        BOSS_SABHP = 0;
-        Score += 250;
+    if (B_SABHP == 1) {
+      if (B_HP <= 0) {
+        B_SABHP = 0;
+        score += 250;
         BOSS_MAX_COUNT = 0;
-        BOSS_HP = 0;
+        B_HP = 0;
       }
     }
-    if (life < 0) ShowGameover("Score || " + Score);
+    if (life < 0) ShowGameover("score || " + score);
     else requestAnimationFrame(arguments.callee);
-    if (BOSS_MAX_COUNT <= 0) ShowClear("GAME CLEAR\nScore||" + Score);
+    if (BOSS_MAX_COUNT <= 0) ShowClear("GAME CLEAR\nscore||" + score);
 
 
   })();
 };
 //ope-2 -----------------------------------------------------------------
 function B0() {
-  BOSS_SABHP = 1;
-  BOSS_HP = 0;
+  B_SABHP = 1;
+  B_HP = 0;
 }
 
 function B1() {
-  BOSS_SABHP = 1;
+  B_SABHP = 1;
 }
 
 function B2() {
-  BOSS_SABHP = 2;
+  B_SABHP = 2;
 }
 
 function B3() {
-  BOSS_SABHP = 3;
+  B_SABHP = 3;
 }
 
 function B4() {
-  BOSS_SABHP = 4;
+  B_SABHP = 4;
+}
+function B_sab() {
+  B_saba = screenCanvas.width / 2;
+  B_sabb = screenCanvas.width / 2;
+  setTimeout(function () { B_chenge = false }, 1)
 }
 // - event --------------------------------------------------------------------
 function mouseMove(event) {
@@ -1334,23 +1579,23 @@ function keyDown(event) {
   Key = ck;
   // チート
   if (event.altKey && event.ctrlKey) {
-    IsCheating = true;
+    cca = true;
   }
   if (ck === 96)
-    IsSlow = true;
+    slow = true;
 
   if (event.shiftKey && event.ctrlKey) {
-    Arecheating = true;
+    ccs = true;
   }
   if (ck === 97) {
     key1 = true;
   }
   if (ck === 99) {
     if (key1) {
-      if (waschea == true) {
-        waschea = false;
-      } else if (waschea == false) {
-        waschea = true;
+      if (c13 == true) {
+        c13 = false;
+      } else if (c13 == false) {
+        c13 = true;
       }
     }
   }
@@ -1416,15 +1661,15 @@ function keyUp(event) {
     return;
   }
   if (ck === 96) {
-    IsSlow = false;
+    slow = false;
     return;
   }
   // チート
   if ((ck === 17) && (18)) {
-    IsCheating = false;
+    cca = false;
   }
   if (ck === 16 && 17) {
-    Arecheating = false;
+    ccs = false;
   }
   if (ck === 97) {
     key1 = false;
@@ -1458,13 +1703,13 @@ function keyUp(event) {
 function ChangeColor() {
   if (invincible) {
     CHARA_COLOR = 'rgba(50, 255, 50, 0.5)';
-  } else if (Wascheating) {
+  } else if (c13ting) {
     CHARA_COLOR = 'rgba(35, 71, 130,1)'; //'rgba(50, 50, 255, 1)';
   } else CHARA_COLOR = 'rgba(0,0,0,1)';
-  if (BOSS_SABHP <= 2) {
+  if (B_SABHP <= 2) {
     BOSS_COLOR = 'rgba(255,255,0,1)', BOSS_SHOT_COLOR = 'rgba(50,50,255,0.88)';
   }
-  if (IsSlow) {
+  if (slow) {
     CHARA_COLOR = 'rgba(50,50,50, 0.5)';
   }
 }

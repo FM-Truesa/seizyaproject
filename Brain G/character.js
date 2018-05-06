@@ -132,7 +132,7 @@ function BossShot() {
     this.vector = new Point();
     this.size = 0;
     this.speed = 0;
-    //this.alive = false;
+    this.alive = false;
 }
 
 BossShot.prototype.set = function (p, vector, size, speed) {
@@ -161,7 +161,7 @@ function BossShot2() {
     this.vector = new Point();
     this.size = 0;
     this.speed = 0;
-    //this.alive = false;
+    this.alive = false;
 }
 
 BossShot2.prototype.set = function (p, vector, size, speed) {
@@ -184,34 +184,61 @@ BossShot2.prototype.move = function () {
         this.alive = false;
     }
 };
-// - BossSAB-------------------------------------------------------------
-function BossSAB() {
+// boss shot3-------------------------
+function BossShot3() {
     this.position = new Point();
-    this.size = 100;
-    this.type = 0;
-    this.param = 0;
+    this.vector = new Point();
+    this.size = 0;
+    this.speed = 0;
     this.alive = false;
 }
 
-BossSAB.prototype.set = function (p, size, type) {
+BossShot3.prototype.set = function (p, vector, size, speed) {
     this.position.x = p.x;
     this.position.y = p.y;
     this.size = size;
-    this.type = type;
-    this.param = 0;
+    this.speed = speed;
+    this.vector = vector;
     this.alive = true;
 };
+BossShot3.prototype.move = function () {
+    this.position.x += this.vector.x * this.speed;
+    this.position.y += this.vector.y * this.speed;
+    if (
+        this.position.x < -this.size ||
+        this.position.y < -this.size ||
+        this.position.x > this.size + screenCanvas.width ||
+        this.position.y > this.size + screenCanvas.height
+    ) {
+        this.alive = false;
+    }
+};
+// boss shot4-------------------------
+function BossShot4() {
+    this.position = new Point();
+    this.vector = new Point();
+    this.size = 0;
+    this.speed = 0;
+    this.alive = false;
+}
 
-BossSAB.prototype.move = function () {
-    this.param++;
-    switch (this.type) {
-        case 0:
-            if (this.position.x >= screenCanvas.width / 6)
-                this.position.x -= 1;
-            break;
-        case 1:
-            if (this.position.x <= screenCanvas.width / 6 * 5)
-                this.position.x += 1;
-            break;
+BossShot4.prototype.set = function (p, vector, size, speed) {
+    this.position.x = p.x;
+    this.position.y = p.y;
+    this.size = size;
+    this.speed = speed;
+    this.vector = vector;
+    this.alive = true;
+};
+BossShot4.prototype.move = function () {
+    this.position.x += this.vector.x * this.speed;
+    this.position.y += this.vector.y * this.speed;
+    if (
+        this.position.x < -this.size ||
+        this.position.y < -this.size ||
+        this.position.x > this.size + screenCanvas.width ||
+        this.position.y > this.size + screenCanvas.height
+    ) {
+        this.alive = false;
     }
 };
