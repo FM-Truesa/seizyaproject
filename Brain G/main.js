@@ -933,7 +933,7 @@ window.onload = function () {
                   }
                 }
                 vectorCounter = 0;
-                for (h = 0; h < BOSS_SHOT_MAX_COUNT; h++) {
+                for (h = 0; h < BOSS_SHOT2_MAX_COUNT; h++) {
                   if (!bossShot3[h].alive) {
                     if (boss[b].type == 0) {
                       bossShot3[h].set({
@@ -1132,25 +1132,26 @@ window.onload = function () {
           //Bossshot----------------------------------
           for (b = 0; b < BOSS_MAX_COUNT; b++) {
             if (boss[b].alive) {
-              if (bosscounter % 80 == 0) {
+              if (bosscounter % 25 == 0) {
                 let Vectors = [{
                   x: 1,
-                  y: 0,
-                  size: boss[b].size / 2
+                  y: 0
                 }, {
                   x: -1,
-                  y: 0,
-                  size: boss[b].size / 2
+                  y: 0
                 }];
                 let vectorCounter = 0;
                 for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
-                  for (h = 0; h < BOSS_SHOT_MAX_COUNT; h++) {
-                    if (!bossShot3[h].alive) {
-                      if (boss[b].type == 0) {
-                        bossShot3[h].set(bossShot[l].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
-                        vectorCounter++;
-                        // console.log(vectorCounter,bossShot[l]);
-                        if (vectorCounter >= Vectors.length) break;
+                  vectorCounter = 0;                  
+                  if (bossShot[l].alive) {
+                    for (h = 0; h < BOSS_SHOT2_MAX_COUNT; h++) {
+                      if (!bossShot3[h].alive) {
+                        if (boss[b].type == 0) {
+                          if (vectorCounter >= Vectors.length) break;
+                          bossShot3[h].set(bossShot[l].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                          vectorCounter++;
+                          // console.log(vectorCounter,bossShot[l]);
+                        }
                       }
                     }
                   }
@@ -1158,13 +1159,16 @@ window.onload = function () {
                 //console.log("a");
                 vectorCounter = 0;
                 for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
-                  for (u = 0; u < BOSS_SHOT2_MAX_COUNT; u++) {
-                    if (!bossShot4[u].alive) {
-                      if (boss[b].type == 0) {
-                        bossShot4[u].set({ x: B_sabb, y: boss[b].position.y }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
-                        vectorCounter++;
-                        // console.log(vectorCounter,bossShot[k]);
-                        if (vectorCounter >= Vectors.length) break;
+                  vectorCounter = 0;                  
+                  if (bossShot2[k].alive) {
+                    for (u = 0; u < BOSS_SHOT2_MAX_COUNT; u++) {
+                      if (!bossShot4[u].alive) {
+                        if (boss[b].type == 0) {
+                          if (vectorCounter >= Vectors.length) break;
+                          bossShot4[u].set(bossShot2[k].position, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                          vectorCounter++;
+                          // console.log(vectorCounter,bossShot[k]);
+                        }
                       }
                     }
                   }
