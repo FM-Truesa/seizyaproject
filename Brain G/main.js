@@ -13,6 +13,11 @@ var /*SHOT_*/ bosscounter = 0;
 //var chara;
 var slow = false;
 var cca = false;
+/*
+  O 
+ /|V
+ / \
+*/
 var ccs = false;
 var c13ting = false;
 var c13 = false;
@@ -32,6 +37,7 @@ var key7 = false;
 var key1 = false;
 var key4 = false;
 var key6 = false;
+var Game_count = 1;
 // - const --------------------------------------------------------------------
 //Chara
 var CHARA_COLOR = 'rgba(0,0,0,1)';
@@ -98,7 +104,7 @@ window.onload = function () {
     info = document.getElementById('info');
     info_2 = document.getElementById('info_2');
   }
-  c13 = true;
+  //c13 = true;
   // - キャラクター用インスタンス-------------------------------
   var chara = new Character();
   chara.init(10);
@@ -211,7 +217,6 @@ window.onload = function () {
           Sabchara = outcharacter / 2;
           Saboutchara = Sabchara / 2;
         }
-
         if (score > -Infinity) {
           if (B_SABHP >= 3) {
             outcharacter = 10;
@@ -244,7 +249,6 @@ window.onload = function () {
           ctx.strokeStyle = 'rgba(0,0,0,1)';
           ctx.stroke();
         }
-
         //中心自機
         ChangeColor();
         ctx.beginPath();
@@ -613,7 +617,7 @@ window.onload = function () {
         ctx.fill();
       }
       //雑魚敵
-      if (score < -Infinity) {
+      if (Game_count == 0) {
         //以下エネミーとのあたり判定 
         if (!c13ting && !invincible) {
           for (m = 0; m < ENEMY_SHOT_MAX_COUNT; m++) {
@@ -651,13 +655,13 @@ window.onload = function () {
         } // enemy と　chara の当り判定
         for (j = 0; j < ENEMY_MAX_COUNT; j++) {
           if (!enemy[j].alive) continue;
-          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
+          for (i = 0; i < CHARA_SHOT_MAX_COUNT; i++) {
             if (!charaShot[j].alive) continue;
-            if (Math.pow(enemyShot[m].position.x - charaShot[j].position.x, 2) +
-              Math.pow(enemyShot[m].position.y - charaShot[j].position.y, 2) <=
-              Math.pow(charaShot[j].size + enemyShot[m].size, 2)) {
-              enemyShot[i].alive = false;
-              charaShot[j].alive = false;
+            if (Math.pow(enemyShot[m].position.x - charaShot[i].position.x, 2) +
+              Math.pow(enemyShot[m].position.y - charaShot[i].position.y, 2) <=
+              Math.pow(charaShot[i].size + enemyShot[m].size, 2)) {
+              enemyShot[m].alive = false;
+              charaShot[i].alive = false;
               score += 50;
             }
           }
@@ -665,13 +669,13 @@ window.onload = function () {
         //以上
         for (j = 0; j < ENEMY_MAX_COUNT; j++) {
           if (!enemy[j].alive) continue;
-          for (j = 0; j < CHARA_SHOT_MAX_COUNT; j++) {
+          for (i = 0; i < CHARA_SHOT_MAX_COUNT; i++) {
             if (!charaShot[j].alive) continue;
-            if (Math.pow(enemy[j].position.x - charaShot[j].position.x, 2) +
-              Math.pow(enemy[j].position.y - charaShot[j].position.y, 2) <=
-              Math.pow(charaShot[j].size + enemy[i].size, 2)) {
+            if (Math.pow(enemy[j].position.x - charaShot[i].position.x, 2) +
+              Math.pow(enemy[j].position.y - charaShot[i].position.y, 2) <=
+              Math.pow(charaShot[i].size + enemy[j].size, 2)) {
               enemy[j].alive = false;
-              charaShot[j].alive = false;
+              charaShot[i].alive = false;
               score += 50;
             }
           }
@@ -690,7 +694,6 @@ window.onload = function () {
             }
           }
         } // enemy を新しく追加
-
         ctx.fillStyle = ENEMY_COLOR;
         ctx.beginPath();
         for (j = 0; j < ENEMY_MAX_COUNT; j++) {
@@ -727,7 +730,7 @@ window.onload = function () {
 
         ctx.fillStyle = ENEMY_SHOT_COLOR;
         ctx.beginPath();
-        for (j = 0; j < ENEMY_MAX_COUNT; j++) {
+        for (m = 0; m < ENEMY_MAX_COUNT; m++) {
           if (!enemyShot[m].alive) continue;
           enemyShot[m].move();
           ctx.arc(
@@ -740,7 +743,7 @@ window.onload = function () {
         }
         ctx.fill();
         // 敵のたまの移動、表示
-      } else if (score > -Infinity) {
+      } else if (Game_count == 1) {
         for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
           if (!bossShot[l].alive) continue;
           if (Math.pow(chara.position.x - bossShot[l].position.x, 2) +
@@ -1062,8 +1065,12 @@ window.onload = function () {
         }; //Boss4
         if (B_SABHP == 3) {
           //System---------------------------------------        
-          if (B_saba >= screenCanvas.width / 7) { B_saba -= 1.5; }
-          if (B_sabb <= screenCanvas.width / 7 * 6) { B_sabb += 1.5; }
+          if (B_saba >= screenCanvas.width / 7) {
+            B_saba -= 1.5;
+          }
+          if (B_sabb <= screenCanvas.width / 7 * 6) {
+            B_sabb += 1.5;
+          }
           //Bossenemy-------------------------------------------
           bosscounter++;
           for (b = 0; b < BOSS_MAX_COUNT; b++) {
@@ -1078,7 +1085,10 @@ window.onload = function () {
                 for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
                   if (!bossShot[l].alive) {
                     if (boss[b].type == 0) {
-                      bossShot[l].set({ x: B_saba, y: boss[b].position.y }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                      bossShot[l].set({
+                        x: B_saba,
+                        y: boss[b].position.y
+                      }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       // console.log(vectorCounter,bossShot[l]);
                       if (vectorCounter >= Vectors.length) break;
@@ -1090,7 +1100,10 @@ window.onload = function () {
                 for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
                   if (!bossShot2[k].alive) {
                     if (boss[b].type == 0) {
-                      bossShot2[k].set({ x: B_sabb, y: boss[b].position.y }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
+                      bossShot2[k].set({
+                        x: B_sabb,
+                        y: boss[b].position.y
+                      }, Vectors[vectorCounter], Vectors[vectorCounter].size || 5, Vectors[vectorCounter].speed || 3);
                       vectorCounter++;
                       // console.log(vectorCounter,bossShot[k]);
                       if (vectorCounter >= Vectors.length) break;
@@ -1142,7 +1155,7 @@ window.onload = function () {
                 }];
                 let vectorCounter = 0;
                 for (l = 0; l < BOSS_SHOT_MAX_COUNT; l++) {
-                  vectorCounter = 0;                  
+                  vectorCounter = 0;
                   if (bossShot[l].alive) {
                     for (h = 0; h < BOSS_SHOT2_MAX_COUNT; h++) {
                       if (!bossShot3[h].alive) {
@@ -1159,7 +1172,7 @@ window.onload = function () {
                 //console.log("a");
                 vectorCounter = 0;
                 for (k = 0; k < BOSS_SHOT2_MAX_COUNT; k++) {
-                  vectorCounter = 0;                  
+                  vectorCounter = 0;
                   if (bossShot2[k].alive) {
                     for (u = 0; u < BOSS_SHOT2_MAX_COUNT; u++) {
                       if (!bossShot4[u].alive) {
@@ -1513,6 +1526,11 @@ window.onload = function () {
         B_HP = 0;
       }
     }
+
+    if (Game_count == 0 && score >= 1000) {
+      Game_count == 1;
+    }
+
     if (life < 0) ShowGameover("score || " + score);
     else requestAnimationFrame(arguments.callee);
     if (BOSS_MAX_COUNT <= 0) ShowClear("GAME CLEAR\nscore||" + score);
@@ -1541,10 +1559,13 @@ function B3() {
 function B4() {
   B_SABHP = 4;
 }
+
 function B_sab() {
   B_saba = screenCanvas.width / 2;
   B_sabb = screenCanvas.width / 2;
-  setTimeout(function () { B_chenge = false }, 1)
+  setTimeout(function () {
+    B_chenge = false
+  }, 1)
 }
 // - event --------------------------------------------------------------------
 function mouseMove(event) {
